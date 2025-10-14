@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Supply Chain Management Platform</title>
+    <!-- Leaflet CSS for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f7b57, #12b9aa, #c2a978);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --surface: #ffffff;
+            --text-primary: #1b1d1f;
+            --text-secondary: #4a4e56;
+            --accent-primary: #0f7b57;
+            --accent-secondary: #12b9aa;
+            --accent-earth: #c2a978;
+            --shadow-soft: 0 18px 40px rgba(15, 40, 60, 0.18);
+            --shadow-card: 0 14px 30px rgba(18, 40, 55, 0.14);
+            --radius-lg: 32px;
+            --radius-md: 20px;
+            --radius-sm: 14px;
+            --transition: 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            color: var(--text-primary);
+            background: #f4f7f8;
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Slide-in Menu */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 300px;
+            height: 100%;
+            background: var(--surface);
+            box-shadow: var(--shadow-soft);
+            z-index: 1000;
+            transition: left var(--transition);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-menu.open {
+            left: 0;
+        }
+
+        .side-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .side-menu-header .brand {
+             display: flex;
+             align-items: center;
+             gap: 12px;
+        }
+        
+        .side-menu-header .logo {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-primary);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+        }
+        
+        .side-menu-header .brand-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .close-menu-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .search-bar {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid #ddd;
+            font-size: 1rem;
+        }
+
+        .login-section {
+            margin-bottom: 2rem;
+        }
+
+        .login-section h3 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .login-section select,
+        .login-section button {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid #ccc;
+            font-size: 1rem;
+        }
+
+        .login-section button {
+            background: var(--accent-primary);
+            color: white;
+            cursor: pointer;
+            border: none;
+            transition: background var(--transition);
+        }
+
+        .login-section button:hover {
+            background: #0d6a4a;
+        }
+        
+        .user-info {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .user-info p {
+             margin-bottom: 0.5rem;
+        }
+
+        .user-info #logout-btn {
+            background: #e74c3c;
+        }
+        .user-info #logout-btn:hover {
+             background: #c0392b;
+        }
+
+        .top-header {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(14px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px clamp(24px, 4vw, 60px);
+            border-bottom: 1px solid rgba(18, 40, 55, 0.08);
+        }
+
+        .mobile-nav-toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 36px;
+            height: 28px;
+            background: transparent;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+        }
+
+        .mobile-nav-toggle span {
+            display: block;
+            height: 4px;
+            border-radius: 999px;
+            background: var(--text-primary);
+            transition: transform var(--transition), opacity var(--transition);
+        }
+        
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .logo {
+          width: 44px;
+          height: 44px;
+          border-radius: var(--radius-sm);
+          background: var(--accent-primary);
+          color: #fff;
+          display: grid;
+          place-items: center;
+          font-weight: 700;
+          font-size: 1.1rem;
+          letter-spacing: 1px;
+          box-shadow: var(--shadow-soft);
+        }
+
+        .brand-name {
+          font-size: 1.2rem;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+        
+        .main-nav {
+          display: none; /* Replaced by side menu */
+        }
+        
+        .dashboard-view {
+            padding: clamp(30px, 5vw, 60px) clamp(24px, 5vw, 110px);
+            min-height: 80vh;
+        }
+
+        .dashboard-header {
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-header h2 {
+            font-size: clamp(2rem, 3vw, 2.8rem);
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+        
+        .product-form {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+            margin-bottom: 2rem;
+        }
+        
+        .product-form h3 {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-grid input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: var(--radius-sm);
+        }
+
+        .product-form button {
+            margin-top: 1rem;
+            padding: 0.8rem 1.5rem;
+            background: var(--accent-secondary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .product-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+            padding: 1.5rem;
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .product-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .product-card h4 {
+            font-size: 1.3rem;
+        }
+
+        .product-card .status {
+             padding: 6px 14px;
+             border-radius: 999px;
+             font-size: 0.8rem;
+             font-weight: 600;
+             letter-spacing: 0.4px;
+        }
+         .status-harvested { background: rgba(194, 169, 120, 0.2); color: #9b6f27;}
+        .status-in-transit { background: rgba(52, 152, 219, 0.2); color: #2980b9;}
+        .status-at-retailer { background: rgba(230, 126, 34, 0.2); color: #d35400;}
+        .status-sold { background: rgba(46, 204, 113, 0.2); color: #27ae60;}
+
+
+        .product-card p {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-card p strong {
+            color: var(--text-primary);
+        }
+
+        .product-actions button, .scan-btn {
+            margin-top: 1rem;
+            padding: 0.6rem 1rem;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+        }
+        
+        .scan-btn {
+            background: var(--accent-earth);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Tracking Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1001;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity var(--transition), visibility var(--transition);
+        }
+
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius-md);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform var(--transition);
+        }
+        
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+        }
+
+        #close-modal {
+            font-size: 2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .tracking-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        
+        @media (min-width: 768px) {
+            .tracking-layout {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        #map {
+            height: 300px;
+            width: 100%;
+            border-radius: var(--radius-sm);
+        }
+        
+        .tracking-details h4 {
+            margin-bottom: 1rem;
+        }
+
+        .timeline {
+            list-style: none;
+            padding: 0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 30px;
+            padding-bottom: 1.5rem;
+            border-left: 2px solid #ddd;
+        }
+
+        .timeline-item:last-child {
+            border-left: none;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -9px;
+            top: 0;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-secondary);
+            border: 2px solid white;
+        }
+        
+        .timeline-item p {
+            margin: 0;
+            color: var(--text-primary);
+        }
+        .timeline-item span {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: block;
+        }
+
+        .qr-code-container {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .qr-code-container canvas {
+            border: 5px solid white;
+            box-shadow: var(--shadow-card);
+            border-radius: var(--radius-sm);
+        }
+
+        /* Original styles from user for sections */
+        .hero-section {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: clamp(24px, 4vw, 60px);
+          padding: clamp(60px, 8vw, 120px) clamp(24px, 5vw, 120px);
+          background: var(--bg-gradient);
+          color: #fff;
+          border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+          box-shadow: var(--shadow-soft);
+        }
+
+        .hero-content h1 {
+          font-size: clamp(2.5rem, 4vw, 3.8rem);
+          line-height: 1.1;
+          margin-bottom: 18px;
+        }
+
+        .hero-content p {
+          font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+          margin-bottom: 30px;
+          color: rgba(255, 255, 255, 0.82);
+        }
+
+        .hero-visual {
+          display: grid;
+          gap: 20px;
+          align-content: start;
+        }
+
+        .hero-badge {
+          background: rgba(255, 255, 255, 0.18);
+          border: 1px solid rgba(255, 255, 255, 0.24);
+          padding: 12px 18px;
+          border-radius: var(--radius-sm);
+          font-weight: 500;
+          letter-spacing: 0.4px;
+          text-transform: uppercase;
+          font-size: 0.88rem;
+          backdrop-filter: blur(12px);
+        }
+
+        .hero-stats {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+          gap: 16px;
+        }
+
+        .stat-card {
+          background: rgba(255, 255, 255, 0.18);
+          border-radius: var(--radius-sm);
+          padding: 18px;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        }
+
+        .stat-card h3 {
+          font-size: 1.6rem;
+          font-weight: 700;
+        }
+
+        .stat-card span {
+          font-size: 0.85rem;
+          color: rgba(255, 255, 255, 0.75);
+        }
+        
+        .site-footer {
+          text-align: center;
+          padding: 28px 18px;
+          color: rgba(27, 29, 31, 0.72);
+          font-size: 0.95rem;
+          border-top: 1px solid rgba(18, 40, 55, 0.08);
+          margin-top: 2rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Slide-in Menu -->
+    <aside class="side-menu" id="side-menu">
+        <div class="side-menu-header">
+             <div class="brand">
+                <div class="logo">FS</div>
+                <span class="brand-name">Food Supply</span>
+            </div>
+            <button class="close-menu-btn" id="close-menu-btn">&times;</button>
+        </div>
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Search Batches...">
+        </div>
+        <div class="login-section" id="login-form">
+            <h3>Select Your Role</h3>
+            <select id="role-selector">
+                <option value="consumer">Consumer</option>
+                <option value="farmer">Farmer</option>
+                <option value="distributor">Distributor</option>
+                <option value="retailer">Retailer</option>
+            </select>
+            <select id="user-selector"></select>
+            <button id="login-btn">Login</button>
+        </div>
+        <div class="user-info hidden" id="user-info">
+            <p>Welcome, <strong id="user-name"></strong>!</p>
+            <p>Role: <strong id="user-role"></strong></p>
+            <button id="logout-btn">Logout</button>
+        </div>
+    </aside>
+
+    <header class="top-header">
+        <button class="mobile-nav-toggle" id="open-menu-btn" aria-label="Toggle navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="brand">
+            <div class="logo">FS</div>
+            <span class="brand-name">Food Supply Chain</span>
+        </div>
+    </header>
+
+    <main>
+        <!-- Home/Consumer View -->
+        <div id="consumer-dashboard" class="dashboard-view">
+            <section class="hero-section">
+                <div class="hero-content">
+                    <h1>Trace Your Food Journey</h1>
+                    <p>Farm → Processor → Distributor → Retailer → You</p>
+                </div>
+                <div class="hero-visual">
+                    <div class="hero-badge">Trusted by Farms & Retailers</div>
+                    <div class="hero-stats">
+                        <div class="stat-card">
+                            <h3>650+</h3>
+                            <span>Tracked Batches</span>
+                        </div>
+                        <div class="stat-card">
+                            <h3>98%</h3>
+                            <span>On-time Deliveries</span>
+                        </div>
+                        <div class="stat-card">
+                            <h3>24/7</h3>
+                            <span>Monitoring</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+             <div class="dashboard-header" style="margin-top: 3rem;">
+                <h2>All Products</h2>
+                <p>Scan a product's QR code to see its full journey.</p>
+            </div>
+            <div id="consumer-product-list" class="product-list">
+                <!-- Consumer products will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Farmer Dashboard -->
+        <div id="farmer-dashboard" class="dashboard-view hidden">
+            <div class="dashboard-header">
+                <h2>Farmer Dashboard</h2>
+                <p>Manage your produce batches from harvest to shipment.</p>
+            </div>
+            <div class="product-form">
+                <h3>Add New Product Batch</h3>
+                <form id="add-product-form">
+                    <div class="form-grid">
+                        <input type="text" id="product-name" placeholder="Product Name (e.g., Organic Apples)" required>
+                        <input type="number" id="product-quantity" placeholder="Quantity (kg)" required>
+                        <input type="date" id="harvest-date" required>
+                    </div>
+                    <button type="submit">Add Batch</button>
+                </form>
+            </div>
+             <h3>Your Batches</h3>
+            <div id="farmer-product-list" class="product-list"></div>
+        </div>
+
+        <!-- Distributor Dashboard -->
+        <div id="distributor-dashboard" class="dashboard-view hidden">
+             <div class="dashboard-header">
+                <h2>Distributor Dashboard</h2>
+                <p>Track and manage incoming and outgoing shipments.</p>
+            </div>
+            <h3>Assigned Batches</h3>
+            <div id="distributor-product-list" class="product-list"></div>
+        </div>
+
+        <!-- Retailer Dashboard -->
+        <div id="retailer-dashboard" class="dashboard-view hidden">
+             <div class="dashboard-header">
+                <h2>Retailer Dashboard</h2>
+                <p>Manage inventory and track product origins.</p>
+            </div>
+            <h3>Received Batches</h3>
+            <div id="retailer-product-list" class="product-list"></div>
+        </div>
+        
+    </main>
+    
+    <footer class="site-footer">
+        <p>© <span id="currentYear"></span> Food Supply Chain Management Platform</p>
+    </footer>
+
+    <!-- Tracking Modal -->
+    <div class="modal-overlay" id="tracking-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Product Journey</h3>
+                <button id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tracking-layout">
+                    <div class="map-container">
+                         <h4>Live Tracking</h4>
+                         <div id="map"></div>
+                    </div>
+                    <div class="tracking-details">
+                        <h4>Timeline</h4>
+                        <ul id="tracking-timeline" class="timeline"></ul>
+                        <div id="modal-qr-code" class="qr-code-container"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <!-- Leaflet JS for Maps -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- MOCK BACKEND & DATA ---
+            const MOCK_USERS = {
+                farmer: [{ id: 'f1', name: 'Suraj' }],
+                distributor: [{ id: 'd1', name: 'Sujal' }],
+                retailer: [{ id: 'r1', name: 'Dhananjay' }],
+                consumer: [{ id: 'c1', name: 'Himanshu' }],
+            };
+
+            let productBatches = [
+                {
+                    id: `batch-1672531200000`, // A fixed ID for the example
+                    name: 'Organic Tomatoes',
+                    quantity: 200,
+                    status: 'sold', // harvested, in-transit, at-retailer, sold
+                    history: [
+                        { status: 'Harvested', by: 'Suraj (Farmer)', timestamp: new Date('2024-10-26T08:00:00Z'), location: { lat: 19.0760, lng: 72.8777 } }, // Mumbai
+                        { status: 'Processed', by: 'Sujal (Processor)', timestamp: new Date('2024-10-26T14:00:00Z'), location: { lat: 18.5204, lng: 73.8567 } }, // Pune
+                        { status: 'In Transit', by: 'Dhananjay (Distributor)', timestamp: new Date('2024-10-27T09:00:00Z'), location: { lat: 12.9716, lng: 77.5946 } }, // Bangalore
+                        { status: 'Sold', by: 'Himanshu (Consumer)', timestamp: new Date('2024-10-28T18:30:00Z'), location: { lat: 12.9716, lng: 77.5946 } } // Bangalore
+                    ]
+                }
+            ];
+            
+            let currentUser = null;
+            let map;
+            let marker;
+            let polyline;
+
+            // --- DOM ELEMENTS ---
+            const openMenuBtn = document.getElementById('open-menu-btn');
+            const closeMenuBtn = document.getElementById('close-menu-btn');
+            const sideMenu = document.getElementById('side-menu');
+            const roleSelector = document.getElementById('role-selector');
+            const userSelector = document.getElementById('user-selector');
+            const loginBtn = document.getElementById('login-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const loginForm = document.getElementById('login-form');
+            const userInfo = document.getElementById('user-info');
+            const searchInput = document.getElementById('search-input');
+            
+            const dashboards = {
+                consumer: document.getElementById('consumer-dashboard'),
+                farmer: document.getElementById('farmer-dashboard'),
+                distributor: document.getElementById('distributor-dashboard'),
+                retailer: document.getElementById('retailer-dashboard'),
+            };
+
+            const productLists = {
+                consumer: document.getElementById('consumer-product-list'),
+                farmer: document.getElementById('farmer-product-list'),
+                distributor: document.getElementById('distributor-product-list'),
+                retailer: document.getElementById('retailer-product-list'),
+            };
+
+            const addProductForm = document.getElementById('add-product-form');
+            const trackingModal = document.getElementById('tracking-modal');
+            const closeModalBtn = document.getElementById('close-modal');
+
+            // --- APP LOGIC ---
+
+            const init = () => {
+                populateUserSelector();
+                bindEventListeners();
+                renderAllDashboards();
+            };
+            
+            const populateUserSelector = () => {
+                const selectedRole = roleSelector.value;
+                userSelector.innerHTML = '';
+                MOCK_USERS[selectedRole].forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = user.name;
+                    userSelector.appendChild(option);
+                });
+            };
+
+            const login = () => {
+                const role = roleSelector.value;
+                const userId = userSelector.value;
+                const userName = MOCK_USERS[role].find(u => u.id === userId).name;
+                
+                currentUser = { id: userId, name: userName, role: role };
+                
+                loginForm.classList.add('hidden');
+                userInfo.classList.remove('hidden');
+                document.getElementById('user-name').textContent = currentUser.name;
+                document.getElementById('user-role').textContent = currentUser.role;
+                
+                switchView(currentUser.role);
+                sideMenu.classList.remove('open');
+                renderAllDashboards();
+            };
+
+            const logout = () => {
+                currentUser = null;
+                loginForm.classList.remove('hidden');
+                userInfo.classList.add('hidden');
+                switchView('consumer'); // Default view
+                renderAllDashboards();
+            };
+
+            const switchView = (role) => {
+                Object.values(dashboards).forEach(d => d.classList.add('hidden'));
+                if (dashboards[role]) {
+                    dashboards[role].classList.remove('hidden');
+                }
+            };
+            
+            const renderAllDashboards = (searchTerm = '') => {
+                 const lowerCaseSearchTerm = searchTerm.toLowerCase();
+                 const filteredBatches = productBatches.filter(p => 
+                    p.name.toLowerCase().includes(lowerCaseSearchTerm) || 
+                    p.id.toLowerCase().includes(lowerCaseSearchTerm)
+                );
+
+                // Filter and render for each role
+                const farmerProducts = filteredBatches.filter(p => p.history[0] && p.history[0].by.includes('Suraj'));
+                renderProductList('farmer', farmerProducts);
+
+                const distributorProducts = filteredBatches.filter(p => p.status === 'processed' || p.history.some(h => h.by.includes('Sujal')));
+                renderProductList('distributor', distributorProducts);
+                
+                const retailerProducts = filteredBatches.filter(p => p.status === 'in-transit' || p.history.some(h => h.by.includes('Dhananjay')));
+                renderProductList('retailer', retailerProducts);
+
+                renderProductList('consumer', filteredBatches);
+            };
+
+            const renderProductList = (role, products) => {
+                const listEl = productLists[role];
+                if (!listEl) return;
+                listEl.innerHTML = '';
+
+                if (products.length === 0) {
+                    listEl.innerHTML = '<p>No batches found.</p>';
+                    return;
+                }
+
+                products.forEach(product => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.innerHTML = `
+                        <div class="product-card-header">
+                            <h4>${product.name}</h4>
+                            <span class="status status-${product.status.replace(/\s+/g, '-').toLowerCase()}">${product.status}</span>
+                        </div>
+                        <p><strong>Quantity:</strong> ${product.quantity} kg</p>
+                        <p><strong>Batch ID:</strong> ${product.id}</p>
+                        <p><strong>Last Update:</strong> ${new Date(product.history[product.history.length-1].timestamp).toLocaleString()}</p>
+                        <div class="product-actions">
+                            ${getActionsForRole(role, product)}
+                        </div>
+                    `;
+                    listEl.appendChild(card);
+                });
+            };
+
+            const getActionsForRole = (role, product) => {
+                let actions = `<button class="scan-btn" data-id="${product.id}">View Journey</button>`;
+                if (!currentUser || currentUser.role !== role) return actions;
+
+                switch(role) {
+                    case 'farmer':
+                        if (product.status === 'harvested') {
+                            actions += `<button data-action="process" data-id="${product.id}">Send to Processor</button>`;
+                        }
+                        break;
+                    case 'distributor': // This is Sujal (Processor)
+                        if (product.status === 'harvested') {
+                             actions += `<button data-action="process" data-id="${product.id}">Process Batch</button>`;
+                        }
+                        if (product.status === 'processed') {
+                             actions += `<button data-action="ship" data-id="${product.id}">Ship to Retailer</button>`;
+                        }
+                        break;
+                    case 'retailer': // This is Dhananjay
+                        if (product.status === 'in-transit') {
+                            actions += `<button data-action="receive_retailer" data-id="${product.id}">Receive at Store</button>`;
+                        }
+                        if(product.status === 'at-retailer'){
+                             actions += `<button data-action="sell" data-id="${product.id}">Mark as Sold</button>`;
+                        }
+                        break;
+                }
+                return actions;
+            };
+
+            const handleProductAction = (e) => {
+                const target = e.target;
+                const action = target.dataset.action;
+                const id = target.dataset.id;
+
+                if (target.classList.contains('scan-btn')) {
+                    showTrackingModal(id);
+                    return;
+                }
+
+                if (!action || !id || !currentUser) return;
+                
+                const product = productBatches.find(p => p.id === id);
+                if (!product) return;
+                
+                let newStatus = '';
+                let newHistoryEntry = { 
+                    by: `${currentUser.name} (${currentUser.role === 'distributor' ? 'Processor' : currentUser.role === 'retailer' ? 'Distributor' : currentUser.role})`, 
+                    timestamp: new Date().toISOString() 
+                };
+                
+                const processorLoc = { lat: 18.5204, lng: 73.8567 }; // Pune
+                const retailerLoc = { lat: 12.9716, lng: 77.5946 }; // Bangalore
+
+                if (action === 'process' && product.status === 'harvested') {
+                     newStatus = 'processed';
+                     newHistoryEntry.status = 'Processed';
+                     newHistoryEntry.location = processorLoc;
+                } else if (action === 'ship' && product.status === 'processed') {
+                     newStatus = 'in-transit';
+                     newHistoryEntry.status = 'In Transit';
+                     newHistoryEntry.by = `Dhananjay (Distributor)`;
+                     newHistoryEntry.location = retailerLoc;
+                } else if (action === 'receive_retailer' && product.status === 'in-transit') {
+                    newStatus = 'at-retailer';
+                    newHistoryEntry.status = 'At Retailer';
+                    newHistoryEntry.by = `Dhananjay (Distributor)`;
+                    newHistoryEntry.location = retailerLoc;
+                } else if (action === 'sell' && product.status === 'at-retailer') {
+                    newStatus = 'sold';
+                    newHistoryEntry.status = 'Sold';
+                    newHistoryEntry.by = `Himanshu (Consumer)`; 
+                    newHistoryEntry.location = retailerLoc;
+                }
+
+                if (newStatus) {
+                    product.status = newStatus;
+                    product.history.push(newHistoryEntry);
+                    renderAllDashboards();
+                }
+            };
+
+            const handleAddProduct = (e) => {
+                e.preventDefault();
+                if (!currentUser || currentUser.role !== 'farmer') return;
+
+                const name = document.getElementById('product-name').value;
+                const quantity = document.getElementById('product-quantity').value;
+                const harvestDate = document.getElementById('harvest-date').value;
+
+                const newBatch = {
+                    id: `batch-${Date.now()}`,
+                    name,
+                    quantity,
+                    status: 'harvested',
+                    history: [
+                        { status: 'Harvested', by: `${currentUser.name} (Farmer)`, timestamp: new Date(harvestDate).toISOString(), location: {lat: 28.7041, lng: 77.1025} } // Delhi
+                    ]
+                };
+                productBatches.unshift(newBatch);
+                renderAllDashboards();
+                addProductForm.reset();
+            };
+            
+            // --- MODAL & MAP ---
+            
+            const showTrackingModal = (productId) => {
+                const product = productBatches.find(p => p.id === productId);
+                if (!product) return;
+
+                document.getElementById('modal-title').textContent = `Journey for ${product.name}`;
+                
+                const timelineEl = document.getElementById('tracking-timeline');
+                timelineEl.innerHTML = '';
+                product.history.forEach(entry => {
+                    const item = document.createElement('li');
+                    item.className = 'timeline-item';
+                    item.innerHTML = `
+                        <p>${entry.status}</p>
+                        <span>by ${entry.by} on ${new Date(entry.timestamp).toLocaleString()}</span>
+                    `;
+                    timelineEl.appendChild(item);
+                });
+                
+                const qrContainer = document.getElementById('modal-qr-code');
+                qrContainer.innerHTML = '';
+                const canvas = document.createElement('canvas');
+                qrContainer.appendChild(canvas);
+                new QRious({
+                    element: canvas,
+                    value: `https://myfoodchain.app/trace?id=${product.id}`, // Scannable URL
+                    size: 150,
+                    background: '#ffffff',
+                    foreground: '#0f7b57'
+                });
+
+                trackingModal.classList.add('visible');
+                initializeMap(product);
+            };
+
+            const initializeMap = (product) => {
+                if(!map){
+                    map = L.map('map');
+                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(map);
+                }
+
+                const locations = product.history.map(h => [h.location.lat, h.location.lng]);
+                
+                if (marker) map.removeLayer(marker);
+                if (polyline) map.removeLayer(polyline);
+
+                if (locations.length > 0) {
+                    const lastLocation = locations[locations.length - 1];
+                     map.setView(lastLocation, 5);
+                     marker = L.marker(lastLocation).addTo(map);
+                     
+                     if (locations.length > 1) {
+                         polyline = L.polyline(locations, {color: 'blue'}).addTo(map);
+                         map.fitBounds(polyline.getBounds());
+                         // Simulate live tracking if in transit
+                         if(product.status === 'in-transit') {
+                             animateMarker(locations[locations.length-2], lastLocation);
+                         }
+                     }
+                }
+            };
+            
+             const animateMarker = (start, end) => {
+                let t = 0;
+                const duration = 5000; // 5 seconds animation
+                const interval = 50;
+                const steps = duration / interval;
+
+                const step = () => {
+                    if (t > steps) return;
+                    const lat = start[0] + (end[0] - start[0]) * (t / steps);
+                    const lng = start[1] + (end[1] - start[1]) * (t / steps);
+                    marker.setLatLng([lat, lng]);
+                    t++;
+                    setTimeout(step, interval);
+                };
+                step();
+            };
+
+
+            const hideTrackingModal = () => {
+                trackingModal.classList.remove('visible');
+            };
+
+
+            // --- EVENT BINDING ---
+            const bindEventListeners = () => {
+                openMenuBtn.addEventListener('click', () => sideMenu.classList.add('open'));
+                closeMenuBtn.addEventListener('click', () => sideMenu.classList.remove('open'));
+                roleSelector.addEventListener('change', populateUserSelector);
+                loginBtn.addEventListener('click', login);
+                logoutBtn.addEventListener('click', logout);
+                addProductForm.addEventListener('submit', handleAddProduct);
+                document.body.addEventListener('click', handleProductAction);
+                
+                searchInput.addEventListener('input', (e) => renderAllDashboards(e.target.value));
+
+                closeModalBtn.addEventListener('click', hideTrackingModal);
+                trackingModal.addEventListener('click', (e) => {
+                    if(e.target === trackingModal) hideTrackingModal();
+                });
+            };
+            
+            document.getElementById("currentYear").textContent = new Date().getFullYear();
+
+            // --- START THE APP ---
+            init();
+        });
+    </script>
+</body>
+</html>
+
