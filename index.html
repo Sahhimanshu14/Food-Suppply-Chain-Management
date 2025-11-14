@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food Supply Chain Management Platform</title>
-    <!-- Leaflet CSS for Maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <style>
         :root {
@@ -110,38 +109,124 @@
             font-size: 1rem;
         }
 
-        .login-section {
+        /* --- New Auth Page Styles --- */
+        #auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 90vh;
+            padding: 2rem;
+            background: var(--bg-gradient);
+        }
+
+        .auth-page {
+            width: 100%;
+            max-width: 450px;
+            background: var(--surface);
+            padding: 2.5rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .auth-page h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent-primary);
+        }
+
+        .auth-form .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .auth-form .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .auth-form .form-group input,
+        .auth-form .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-family: var(--font-family);
+        }
+
+        .auth-form .auth-button {
+            width: 100%;
+            padding: 0.9rem;
+            margin-top: 1rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: var(--accent-primary);
+            color: white;
+            cursor: pointer;
+            transition: background var(--transition);
+        }
+
+        .auth-form .auth-button:hover {
+            background: #0d6a4a;
+        }
+
+        .auth-switch-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .auth-switch-link span {
+            color: var(--text-secondary);
+        }
+
+        .auth-switch-link a {
+            color: var(--accent-primary);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .auth-error-message {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: 1rem;
+            display: none; /* Hidden by default */
+        }
+        
+        /* --- Side Menu Auth Links --- */
+        .side-menu-auth {
             margin-bottom: 2rem;
         }
-
-        .login-section h3 {
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-            color: var(--text-primary);
-        }
-
-        .login-section select,
-        .login-section button {
+        
+        .side-menu-auth button {
             width: 100%;
             padding: 0.8rem;
             margin-bottom: 0.5rem;
             border-radius: var(--radius-sm);
             border: 1px solid #ccc;
             font-size: 1rem;
-        }
-
-        .login-section button {
+            cursor: pointer;
             background: var(--accent-primary);
             color: white;
-            cursor: pointer;
-            border: none;
             transition: background var(--transition);
         }
-
-        .login-section button:hover {
+        .side-menu-auth button:hover {
             background: #0d6a4a;
         }
-        
+        .side-menu-auth button.secondary {
+            background: var(--surface);
+            color: var(--accent-primary);
+            border: 1px solid var(--accent-primary);
+        }
+         .side-menu-auth button.secondary:hover {
+             background: #f0f4f8;
+         }
+
         .user-info {
             margin-top: auto;
             padding-top: 1rem;
@@ -153,7 +238,15 @@
         }
 
         .user-info #logout-btn {
+            width: 100%;
+            padding: 0.8rem;
+            margin-top: 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
             background: #e74c3c;
+            color: white;
+            border: none;
+            cursor: pointer;
         }
         .user-info #logout-btn:hover {
              background: #c0392b;
@@ -199,27 +292,27 @@
         }
 
         .logo {
-          width: 44px;
-          height: 44px;
-          border-radius: var(--radius-sm);
-          background: var(--accent-primary);
-          color: #fff;
-          display: grid;
-          place-items: center;
-          font-weight: 700;
-          font-size: 1.1rem;
-          letter-spacing: 1px;
-          box-shadow: var(--shadow-soft);
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-primary);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            box-shadow: var(--shadow-soft);
         }
 
         .brand-name {
-          font-size: 1.2rem;
-          font-weight: 600;
-          color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
         }
         
         .main-nav {
-          display: none; /* Replaced by side menu */
+            display: none; /* Replaced by side menu */
         }
         
         .dashboard-view {
@@ -319,17 +412,32 @@
         .status-in-transit { background: rgba(52, 152, 219, 0.2); color: #2980b9;}
         .status-at-retailer { background: rgba(230, 126, 34, 0.2); color: #d35400;}
         .status-sold { background: rgba(46, 204, 113, 0.2); color: #27ae60;}
+        .status-processed { background: rgba(142, 68, 173, 0.2); color: #8e44ad;}
 
 
         .product-card p {
             color: var(--text-secondary);
             margin-bottom: 0.5rem;
+            word-break: break-all; /* Ensure long IDs wrap */
         }
         
         .product-card p strong {
             color: var(--text-primary);
         }
 
+        /* QR CODE STYLES */
+        .card-qr-container {
+            text-align: center;
+            margin: 1rem 0 0.5rem 0;
+        }
+        
+        .card-qr-container canvas {
+            border-radius: var(--radius-sm);
+            border: 4px solid var(--surface);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        
+        /* ACTIONS */
         .product-actions button, .scan-btn {
             margin-top: 1rem;
             padding: 0.6rem 1rem;
@@ -338,6 +446,8 @@
             border: none;
             border-radius: var(--radius-sm);
             cursor: pointer;
+            margin-right: 0.5rem; /* Add some spacing between buttons */
+            font-weight: 600;
         }
         
         .scan-btn {
@@ -414,18 +524,27 @@
         
         @media (min-width: 768px) {
             .tracking-layout {
-                grid-template-columns: 1fr 1fr;
+                 grid-template-columns: 1fr 1fr;
             }
         }
         
         #map {
-            height: 300px;
+            height: 350px; /* Increased map height for better viewing */
             width: 100%;
             border-radius: var(--radius-sm);
+            background-color: #eee;
+            border: 1px solid #ddd;
         }
         
         .tracking-details h4 {
             margin-bottom: 1rem;
+        }
+        
+        .tracking-details h5 {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
         }
 
         .timeline {
@@ -441,7 +560,8 @@
         }
 
         .timeline-item:last-child {
-            border-left: none;
+            border-left: 2px solid transparent; /* Remove border line after last item for visual cleanup */
+            padding-bottom: 0.5rem;
         }
         
         .timeline-item::before {
@@ -454,11 +574,13 @@
             border-radius: 50%;
             background: var(--accent-secondary);
             border: 2px solid white;
+            box-shadow: 0 0 0 2px var(--accent-secondary);
         }
         
         .timeline-item p {
             margin: 0;
             color: var(--text-primary);
+            font-weight: 600;
         }
         .timeline-item span {
             font-size: 0.9rem;
@@ -476,8 +598,26 @@
             box-shadow: var(--shadow-card);
             border-radius: var(--radius-sm);
         }
+        
+        /* Truck Icon CSS for Leaflet Marker */
+        .truck-icon {
+            background: var(--accent-primary);
+            color: white;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            text-align: center;
+            line-height: 26px; /* Adjust for vertical centering */
+        }
 
-        /* Original styles from user for sections */
+
+        /* Original styles for sections */
         .hero-section {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -555,29 +695,24 @@
 </head>
 <body>
 
-    <!-- Slide-in Menu -->
     <aside class="side-menu" id="side-menu">
         <div class="side-menu-header">
              <div class="brand">
-                <div class="logo">FS</div>
-                <span class="brand-name">Food Supply</span>
-            </div>
+                 <div class="logo">FS</div>
+                 <span class="brand-name">Food Supply</span>
+             </div>
             <button class="close-menu-btn" id="close-menu-btn">&times;</button>
         </div>
         <div class="search-bar">
             <input type="text" id="search-input" placeholder="Search Batches...">
         </div>
-        <div class="login-section" id="login-form">
-            <h3>Select Your Role</h3>
-            <select id="role-selector">
-                <option value="consumer">Consumer</option>
-                <option value="farmer">Farmer</option>
-                <option value="distributor">Distributor</option>
-                <option value="retailer">Retailer</option>
-            </select>
-            <select id="user-selector"></select>
-            <button id="login-btn">Login</button>
+        
+        <!-- Updated Auth Section in Side Menu -->
+        <div class="side-menu-auth" id="side-menu-auth-links">
+            <button id="side-menu-login-btn">Login</button>
+            <button id="side-menu-register-btn" class="secondary">Register</button>
         </div>
+        
         <div class="user-info hidden" id="user-info">
             <p>Welcome, <strong id="user-name"></strong>!</p>
             <p>Role: <strong id="user-role"></strong></p>
@@ -585,7 +720,7 @@
         </div>
     </aside>
 
-    <header class="top-header">
+    <header class="top-header" id="top-header">
         <button class="mobile-nav-toggle" id="open-menu-btn" aria-label="Toggle navigation">
             <span></span>
             <span></span>
@@ -597,87 +732,148 @@
         </div>
     </header>
 
-    <main>
-        <!-- Home/Consumer View -->
-        <div id="consumer-dashboard" class="dashboard-view">
-            <section class="hero-section">
-                <div class="hero-content">
-                    <h1>Trace Your Food Journey</h1>
-                    <p>Farm → Processor → Distributor → Retailer → You</p>
+    <!-- New Auth Container -->
+    <div id="auth-container">
+        <!-- Login Page -->
+        <div id="login-page" class="auth-page">
+            <h2>Login</h2>
+            <form id="login-form" class="auth-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" required>
                 </div>
-                <div class="hero-visual">
-                    <div class="hero-badge">Trusted by Farms & Retailers</div>
-                    <div class="hero-stats">
-                        <div class="stat-card">
-                            <h3>650+</h3>
-                            <span>Tracked Batches</span>
-                        </div>
-                        <div class="stat-card">
-                            <h3>98%</h3>
-                            <span>On-time Deliveries</span>
-                        </div>
-                        <div class="stat-card">
-                            <h3>24/7</h3>
-                            <span>Monitoring</span>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <p id="login-error" class="auth-error-message">Invalid email or password.</p>
+                <button type="submit" class="auth-button">Login</button>
+            </form>
+            <p class="auth-switch-link">
+                <span>Don't have an account?</span>
+                <a id="go-to-register-link">Register</a>
+            </p>
+        </div>
+
+        <!-- Register Page -->
+        <div id="register-page" class="auth-page hidden">
+            <h2>Register</h2>
+            <form id="register-form" class="auth-form">
+                <div class="form-group">
+                    <label for="register-role">I am a:</label>
+                    <select id="register-role">
+                        <option value="consumer">Consumer</option>
+                        <option value="farmer">Farmer</option>
+                        <option value="processor">Processor</option>
+                        <option value="retailer">Retailer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="register-name">Full Name</label>
+                    <input type="text" id="register-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-contact">Contact No.</label>
+                    <input type="tel" id="register-contact" required>
+                </div>
+                <p id="register-error" class="auth-error-message">This email is already registered.</p>
+                <button type="submit" class="auth-button">Register</button>
+            </form>
+            <p class="auth-switch-link">
+                <span>Already have an account?</span>
+                <a id="go-to-login-link">Login</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Container (hidden by default) -->
+    <div id="main-container" class="hidden">
+        <main>
+            <div id="consumer-dashboard" class="dashboard-view">
+                <section class="hero-section">
+                    <div class="hero-content">
+                        <h1>Trace Your Food Journey</h1>
+                        <p>Farm → Processor → Retailer → You</p>
+                    </div>
+                    <div class="hero-visual">
+                        <div class="hero-badge">Trusted by Farms & Retailers</div>
+                        <div class="hero-stats">
+                            <div class="stat-card">
+                                <h3>650+</h3>
+                                <span>Tracked Batches</span>
+                            </div>
+                            <div class="stat-card">
+                                <h3>98%</h3>
+                                <span>On-time Deliveries</span>
+                            </div>
+                            <div class="stat-card">
+                                <h3>24/7</h3>
+                                <span>Monitoring</span>
+                            </div>
                         </div>
                     </div>
+                </section>
+                <div class="dashboard-header" style="margin-top: 3rem;">
+                    <h2>All Products</h2>
+                    <p>Scan a product's QR code or click "View Journey" to see its full details.</p>
                 </div>
-            </section>
-             <div class="dashboard-header" style="margin-top: 3rem;">
-                <h2>All Products</h2>
-                <p>Scan a product's QR code to see its full journey.</p>
+                <div id="consumer-product-list" class="product-list">
+                    <!-- Product cards will be injected here -->
+                </div>
             </div>
-            <div id="consumer-product-list" class="product-list">
-                <!-- Consumer products will be rendered here -->
-            </div>
-        </div>
 
-        <!-- Farmer Dashboard -->
-        <div id="farmer-dashboard" class="dashboard-view hidden">
-            <div class="dashboard-header">
-                <h2>Farmer Dashboard</h2>
-                <p>Manage your produce batches from harvest to shipment.</p>
+            <div id="farmer-dashboard" class="dashboard-view hidden">
+                <div class="dashboard-header">
+                    <h2>Farmer Dashboard</h2>
+                    <p>Manage your produce batches from harvest to shipment.</p>
+                </div>
+                <div class="product-form">
+                    <h3>Add New Product Batch</h3>
+                    <form id="add-product-form">
+                        <div class="form-grid">
+                            <input type="text" id="product-name" placeholder="Product Name (e.g., Organic Apples)" required>
+                            <input type="number" id="product-quantity" placeholder="Quantity (kg)" required>
+                            <input type="date" id="harvest-date" required>
+                        </div>
+                        <button type="submit">Add Batch</button>
+                    </form>
+                </div>
+                <h3>Your Batches</h3>
+                <div id="farmer-product-list" class="product-list"></div>
             </div>
-            <div class="product-form">
-                <h3>Add New Product Batch</h3>
-                <form id="add-product-form">
-                    <div class="form-grid">
-                        <input type="text" id="product-name" placeholder="Product Name (e.g., Organic Apples)" required>
-                        <input type="number" id="product-quantity" placeholder="Quantity (kg)" required>
-                        <input type="date" id="harvest-date" required>
-                    </div>
-                    <button type="submit">Add Batch</button>
-                </form>
-            </div>
-             <h3>Your Batches</h3>
-            <div id="farmer-product-list" class="product-list"></div>
-        </div>
 
-        <!-- Distributor Dashboard -->
-        <div id="distributor-dashboard" class="dashboard-view hidden">
-             <div class="dashboard-header">
-                <h2>Distributor Dashboard</h2>
-                <p>Track and manage incoming and outgoing shipments.</p>
+            <div id="processor-dashboard" class="dashboard-view hidden">
+                <div class="dashboard-header">
+                    <h2>Processor Dashboard</h2>
+                    <p>Track and manage incoming and outgoing batches.</p>
+                </div>
+                <h3>Batches to Process</h3>
+                <div id="processor-product-list" class="product-list"></div>
             </div>
-            <h3>Assigned Batches</h3>
-            <div id="distributor-product-list" class="product-list"></div>
-        </div>
 
-        <!-- Retailer Dashboard -->
-        <div id="retailer-dashboard" class="dashboard-view hidden">
-             <div class="dashboard-header">
-                <h2>Retailer Dashboard</h2>
-                <p>Manage inventory and track product origins.</p>
+            <div id="retailer-dashboard" class="dashboard-view hidden">
+                <div class="dashboard-header">
+                    <h2>Retailer Dashboard</h2>
+                    <p>Manage inventory and track product origins.</p>
+                </div>
+                <h3>Store Inventory</h3>
+                <div id="retailer-product-list" class="product-list"></div>
             </div>
-            <h3>Received Batches</h3>
-            <div id="retailer-product-list" class="product-list"></div>
-        </div>
+            
+        </main>
         
-    </main>
-    
-    <footer class="site-footer">
-        <p>© <span id="currentYear"></span> Food Supply Chain Management Platform</p>
-    </footer>
+        <footer class="site-footer">
+            <p>© <span id="currentYear"></span> Food Supply Chain Management Platform</p>
+        </footer>
+    </div>
 
     <!-- Tracking Modal -->
     <div class="modal-overlay" id="tracking-modal">
@@ -690,12 +886,17 @@
                 <div class="tracking-layout">
                     <div class="map-container">
                          <h4>Live Tracking</h4>
+                         <!-- Leaflet Map Container -->
                          <div id="map"></div>
                     </div>
                     <div class="tracking-details">
                         <h4>Timeline</h4>
                         <ul id="tracking-timeline" class="timeline"></ul>
-                        <div id="modal-qr-code" class="qr-code-container"></div>
+                        
+                        <h5>Scan to Track</h5>
+                        <div id="modal-qr-code" class="qr-code-container">
+                            <!-- QR Code will be generated here -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -703,114 +904,263 @@
     </div>
 
 
-    <!-- QR Code Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <!-- Leaflet JS for Maps -->
+    <!-- Leaflet JS Library for Mapping -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
             // --- MOCK BACKEND & DATA ---
-            const MOCK_USERS = {
-                farmer: [{ id: 'f1', name: 'Suraj' }],
-                distributor: [{ id: 'd1', name: 'Sujal' }],
-                retailer: [{ id: 'r1', name: 'Dhananjay' }],
-                consumer: [{ id: 'c1', name: 'Himanshu' }],
+            
+            // New MOCK_USERS as an array for registration
+            let MOCK_USERS = [
+                { id: 'f1', name: 'Farmer User 1', role: 'farmer', email: 'farmer@test.com', password: '123', contact: '9998887771' },
+                { id: 'd1', name: 'Processor User 1', role: 'processor', email: 'dist@test.com', password: '123', contact: '9998887772' },
+                { id: 'r1', name: 'Retailer User 1', role: 'retailer', email: 'retail@test.com', password: '123', contact: '9998887773' },
+                { id: 'c1', name: 'Consumer User 1', role: 'consumer', email: 'consumer@test.com', password: '123', contact: '9998887774' },
+            ];
+            
+            // Location constants
+            const LOCATIONS = {
+                MUMBAI_FARM: { lat: 19.0760, lng: 72.8777, name: "Mumbai Farm" },
+                PUNE_HUB: { lat: 18.5204, lng: 73.8567, name: "Pune Processing Hub" },
+                BANGALORE_RETAIL: { lat: 12.9716, lng: 77.5946, name: "Bangalore Retail Store" },
+                DELHI_HUB: { lat: 28.7041, lng: 77.1025, name: "Delhi Distribution" }
             };
 
             let productBatches = [
                 {
-                    id: `batch-1672531200000`, // A fixed ID for the example
+                    id: `batch-1672531200000`, 
+                    farmerId: 'f1', // Added farmerId to link to a user
                     name: 'Organic Tomatoes',
                     quantity: 200,
-                    status: 'sold', // harvested, in-transit, at-retailer, sold
+                    status: 'sold',
                     history: [
-                        { status: 'Harvested', by: 'Suraj (Farmer)', timestamp: new Date('2024-10-26T08:00:00Z'), location: { lat: 19.0760, lng: 72.8777 } }, // Mumbai
-                        { status: 'Processed', by: 'Sujal (Processor)', timestamp: new Date('2024-10-26T14:00:00Z'), location: { lat: 18.5204, lng: 73.8567 } }, // Pune
-                        { status: 'In Transit', by: 'Dhananjay (Distributor)', timestamp: new Date('2024-10-27T09:00:00Z'), location: { lat: 12.9716, lng: 77.5946 } }, // Bangalore
-                        { status: 'Sold', by: 'Himanshu (Consumer)', timestamp: new Date('2024-10-28T18:30:00Z'), location: { lat: 12.9716, lng: 77.5946 } } // Bangalore
+                        { status: 'Harvested', by: 'Farmer User 1 (farmer)', timestamp: new Date('2025-10-26T08:00:00Z'), location: LOCATIONS.MUMBAI_FARM },
+                        { status: 'Processed', by: 'Processor User 1 (processor)', timestamp: new Date('2025-10-26T14:00:00Z'), location: LOCATIONS.PUNE_HUB },
+                        { status: 'Received by Retailer', by: 'Retailer User 1 (retailer)', timestamp: new Date('2025-10-27T09:00:00Z'), location: LOCATIONS.BANGALORE_RETAIL },
+                        { status: 'Sold', by: 'Consumer User 1 (consumer)', timestamp: new Date('2025-10-28T18:30:00Z'), location: LOCATIONS.BANGALORE_RETAIL }
                     ]
+                },
+                {
+                    id: `batch-1678886400000`, 
+                    farmerId: 'f1', // Added farmerId
+                    name: 'Fresh Strawberries',
+                    quantity: 150,
+                    status: 'in-transit', 
+                    history: [
+                        { status: 'Harvested', by: 'Farmer User 1 (farmer)', timestamp: new Date('2025-11-13T10:00:00Z'), location: LOCATIONS.MUMBAI_FARM },
+                        { status: 'Processed', by: 'Processor User 1 (processor)', timestamp: new Date('2025-11-14T08:00:00Z'), location: LOCATIONS.PUNE_HUB }
+                    ],
+                    destination: LOCATIONS.BANGALORE_RETAIL
                 }
             ];
             
             let currentUser = null;
+            
+            // --- Map & Tracking Variables ---
             let map;
-            let marker;
-            let polyline;
+            let liveMarker;
+            let historicalPolyline;
+            let historicalMarkers = []; // Array to store historical markers
+            let liveTrackingInterval = null;
+            
+            const truckIcon = L.divIcon({
+                className: 'truck-icon',
+                html: '🚚',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+            
+            // --- Map Utility Functions ---
+            
+            const initMap = () => {
+                 if (!map) {
+                    map = L.map('map');
+                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(map);
+                }
+            }
 
+            const clearMapLayers = () => {
+                if (liveTrackingInterval) {
+                    clearInterval(liveTrackingInterval);
+                    liveTrackingInterval = null;
+                }
+                if (liveMarker) {
+                    liveMarker.remove();
+                    liveMarker = null;
+                }
+                if (historicalPolyline) {
+                    historicalPolyline.remove();
+                    historicalPolyline = null;
+                }
+                historicalMarkers.forEach(marker => marker.remove());
+                historicalMarkers = [];
+            }
+            
             // --- DOM ELEMENTS ---
             const openMenuBtn = document.getElementById('open-menu-btn');
             const closeMenuBtn = document.getElementById('close-menu-btn');
             const sideMenu = document.getElementById('side-menu');
-            const roleSelector = document.getElementById('role-selector');
-            const userSelector = document.getElementById('user-selector');
-            const loginBtn = document.getElementById('login-btn');
-            const logoutBtn = document.getElementById('logout-btn');
-            const loginForm = document.getElementById('login-form');
-            const userInfo = document.getElementById('user-info');
             const searchInput = document.getElementById('search-input');
+            const topHeader = document.getElementById('top-header');
+
+            // --- Auth Elements ---
+            const authContainer = document.getElementById('auth-container');
+            const mainContainer = document.getElementById('main-container');
+            const loginPage = document.getElementById('login-page');
+            const registerPage = document.getElementById('register-page');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const loginError = document.getElementById('login-error');
+            const registerError = document.getElementById('register-error');
+            const goToRegisterLink = document.getElementById('go-to-register-link');
+            const goToLoginLink = document.getElementById('go-to-login-link');
             
+            // --- Side Menu Auth Elements ---
+            const sideMenuAuthLinks = document.getElementById('side-menu-auth-links');
+            const sideMenuLoginBtn = document.getElementById('side-menu-login-btn');
+            const sideMenuRegisterBtn = document.getElementById('side-menu-register-btn');
+            const userInfo = document.getElementById('user-info');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            // --- Dashboard Elements ---
             const dashboards = {
                 consumer: document.getElementById('consumer-dashboard'),
                 farmer: document.getElementById('farmer-dashboard'),
-                distributor: document.getElementById('distributor-dashboard'),
+                processor: document.getElementById('processor-dashboard'),
                 retailer: document.getElementById('retailer-dashboard'),
             };
 
             const productLists = {
                 consumer: document.getElementById('consumer-product-list'),
                 farmer: document.getElementById('farmer-product-list'),
-                distributor: document.getElementById('distributor-product-list'),
+                processor: document.getElementById('processor-product-list'),
                 retailer: document.getElementById('retailer-product-list'),
             };
 
             const addProductForm = document.getElementById('add-product-form');
+            
+            // --- Modal Elements ---
             const trackingModal = document.getElementById('tracking-modal');
             const closeModalBtn = document.getElementById('close-modal');
+            const modalQrCodeContainer = document.getElementById('modal-qr-code');
+            const trackingTimeline = document.getElementById('tracking-timeline');
+            const modalTitle = document.getElementById('modal-title');
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
 
             // --- APP LOGIC ---
 
             const init = () => {
-                populateUserSelector();
                 bindEventListeners();
-                renderAllDashboards();
+                updateUIForLogout(); // Start in logged-out state
+                showPage('login'); // Show login page by default
             };
             
-            const populateUserSelector = () => {
-                const selectedRole = roleSelector.value;
-                userSelector.innerHTML = '';
-                MOCK_USERS[selectedRole].forEach(user => {
-                    const option = document.createElement('option');
-                    option.value = user.id;
-                    option.textContent = user.name;
-                    userSelector.appendChild(option);
-                });
+            // --- New Auth & Page Functions ---
+            
+            const showPage = (pageName) => {
+                // Hide all main containers
+                authContainer.classList.add('hidden');
+                mainContainer.classList.add('hidden');
+                topHeader.classList.add('hidden');
+                
+                // Hide auth sub-pages
+                loginPage.classList.add('hidden');
+                registerPage.classList.add('hidden');
+
+                if (pageName === 'login') {
+                    authContainer.classList.remove('hidden');
+                    loginPage.classList.remove('hidden');
+                } else if (pageName === 'register') {
+                    authContainer.classList.remove('hidden');
+                    registerPage.classList.remove('hidden');
+                } else if (pageName === 'dashboard') {
+                    mainContainer.classList.remove('hidden');
+                    topHeader.classList.remove('hidden');
+                }
+            };
+            
+            const handleLogin = (e) => {
+                e.preventDefault();
+                loginError.style.display = 'none';
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                
+                const user = MOCK_USERS.find(u => u.email === email && u.password === password);
+                
+                if (user) {
+                    currentUser = user;
+                    updateUIForLogin();
+                    showPage('dashboard');
+                    loginForm.reset();
+                } else {
+                    loginError.style.display = 'block';
+                }
             };
 
-            const login = () => {
-                const role = roleSelector.value;
-                const userId = userSelector.value;
-                const userName = MOCK_USERS[role].find(u => u.id === userId).name;
+            const handleRegister = (e) => {
+                e.preventDefault();
+                registerError.style.display = 'none';
                 
-                currentUser = { id: userId, name: userName, role: role };
+                const role = document.getElementById('register-role').value;
+                const name = document.getElementById('register-name').value;
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+                const contact = document.getElementById('register-contact').value;
                 
-                loginForm.classList.add('hidden');
+                const existingUser = MOCK_USERS.find(u => u.email === email);
+                
+                if (existingUser) {
+                    registerError.style.display = 'block';
+                    return;
+                }
+                
+                const newUser = {
+                    id: `user-${new Date().getTime()}`,
+                    role, name, email, password, contact
+                };
+                
+                MOCK_USERS.push(newUser);
+                console.log('Registered new user:', newUser);
+                registerForm.reset();
+                showPage('login'); // Go to login page after successful registration
+            };
+            
+            const handleLogout = () => {
+                currentUser = null;
+                updateUIForLogout();
+                showPage('login');
+            };
+
+            const updateUIForLogin = () => {
+                // Update side menu
+                sideMenuAuthLinks.classList.add('hidden');
                 userInfo.classList.remove('hidden');
                 document.getElementById('user-name').textContent = currentUser.name;
                 document.getElementById('user-role').textContent = currentUser.role;
-                
-                switchView(currentUser.role);
                 sideMenu.classList.remove('open');
+                
+                // Set correct dashboard view
+                switchView(currentUser.role);
                 renderAllDashboards();
+                
+                // Check for URL hash now that user is logged in
+                checkUrlHash();
             };
 
-            const logout = () => {
-                currentUser = null;
-                loginForm.classList.remove('hidden');
+            const updateUIForLogout = () => {
+                // Update side menu
+                sideMenuAuthLinks.classList.remove('hidden');
                 userInfo.classList.add('hidden');
-                switchView('consumer'); // Default view
-                renderAllDashboards();
+                document.getElementById('user-name').textContent = '';
+                document.getElementById('user-role').textContent = '';
+                sideMenu.classList.remove('open');
             };
+
+            // --- Existing Dashboard Functions (Modified) ---
 
             const switchView = (role) => {
                 Object.values(dashboards).forEach(d => d.classList.add('hidden'));
@@ -820,23 +1170,33 @@
             };
             
             const renderAllDashboards = (searchTerm = '') => {
+                 if (!currentUser) return; // Don't render if logged out
+
                  const lowerCaseSearchTerm = searchTerm.toLowerCase();
-                 const filteredBatches = productBatches.filter(p => 
-                    p.name.toLowerCase().includes(lowerCaseSearchTerm) || 
-                    p.id.toLowerCase().includes(lowerCaseSearchTerm)
-                );
+                 const allFilteredBatches = productBatches.filter(p => 
+                      p.name.toLowerCase().includes(lowerCaseSearchTerm) || 
+                      p.id.toLowerCase().includes(lowerCaseSearchTerm)
+                 );
 
-                // Filter and render for each role
-                const farmerProducts = filteredBatches.filter(p => p.history[0] && p.history[0].by.includes('Suraj'));
-                renderProductList('farmer', farmerProducts);
-
-                const distributorProducts = filteredBatches.filter(p => p.status === 'processed' || p.history.some(h => h.by.includes('Sujal')));
-                renderProductList('distributor', distributorProducts);
+                // --- Updated Filter Logic ---
+                if (currentUser.role === 'farmer') {
+                    const farmerProducts = allFilteredBatches.filter(p => p.farmerId === currentUser.id);
+                    renderProductList('farmer', farmerProducts);
+                }
                 
-                const retailerProducts = filteredBatches.filter(p => p.status === 'in-transit' || p.history.some(h => h.by.includes('Dhananjay')));
-                renderProductList('retailer', retailerProducts);
-
-                renderProductList('consumer', filteredBatches);
+                if (currentUser.role === 'processor') {
+                    const processorProducts = allFilteredBatches.filter(p => p.status === 'processed' || p.status === 'in-transit' || p.status === 'harvested'); // Let processor see harvested
+                    renderProductList('processor', processorProducts);
+                }
+                 
+                if (currentUser.role === 'retailer') {
+                     const retailerProducts = allFilteredBatches.filter(p => p.status === 'at-retailer' || p.status === 'sold' || p.status === 'in-transit'); // Retailer can see incoming
+                     renderProductList('retailer', retailerProducts);
+                }
+                
+                if (currentUser.role === 'consumer') {
+                    renderProductList('consumer', allFilteredBatches);
+                }
             };
 
             const renderProductList = (role, products) => {
@@ -860,33 +1220,57 @@
                         <p><strong>Quantity:</strong> ${product.quantity} kg</p>
                         <p><strong>Batch ID:</strong> ${product.id}</p>
                         <p><strong>Last Update:</strong> ${new Date(product.history[product.history.length-1].timestamp).toLocaleString()}</p>
+                        
+                        <!-- QR CODE CONTAINER FOR THE CARD -->
+                        <div class="card-qr-container">
+                            <canvas id="qr-${product.id}"></canvas>
+                        </div>
+                        
                         <div class="product-actions">
                             ${getActionsForRole(role, product)}
                         </div>
                     `;
                     listEl.appendChild(card);
+
+                    // Generate QR code for the card
+                    const trackUrl = `${window.location.href.split('#')[0]}#product=${product.id}`;
+                    const qrCanvas = document.getElementById(`qr-${product.id}`);
+                    if (qrCanvas) {
+                        new QRious({
+                            element: qrCanvas,
+                            value: trackUrl,
+                            size: 100, // Smaller size for the card
+                            padding: 5,
+                            background: 'white',
+                            foreground: 'black'
+                        });
+                    }
                 });
             };
 
             const getActionsForRole = (role, product) => {
+                // All roles can view the journey
                 let actions = `<button class="scan-btn" data-id="${product.id}">View Journey</button>`;
+                
                 if (!currentUser || currentUser.role !== role) return actions;
 
+                // Role-specific actions
                 switch(role) {
                     case 'farmer':
-                        if (product.status === 'harvested') {
+                        // Only the farmer who owns it can send it
+                        if (product.status === 'harvested' && product.farmerId === currentUser.id) {
                             actions += `<button data-action="process" data-id="${product.id}">Send to Processor</button>`;
                         }
                         break;
-                    case 'distributor': // This is Sujal (Processor)
-                        if (product.status === 'harvested') {
+                    case 'processor':
+                        if (product.status === 'harvested') { // Processor can now process harvested batches
                              actions += `<button data-action="process" data-id="${product.id}">Process Batch</button>`;
                         }
                         if (product.status === 'processed') {
                              actions += `<button data-action="ship" data-id="${product.id}">Ship to Retailer</button>`;
                         }
                         break;
-                    case 'retailer': // This is Dhananjay
+                    case 'retailer':
                         if (product.status === 'in-transit') {
                             actions += `<button data-action="receive_retailer" data-id="${product.id}">Receive at Store</button>`;
                         }
@@ -915,175 +1299,265 @@
                 
                 let newStatus = '';
                 let newHistoryEntry = { 
-                    by: `${currentUser.name} (${currentUser.role === 'distributor' ? 'Processor' : currentUser.role === 'retailer' ? 'Distributor' : currentUser.role})`, 
+                    by: `${currentUser.name} (${currentUser.role})`, 
                     timestamp: new Date().toISOString() 
                 };
-                
-                const processorLoc = { lat: 18.5204, lng: 73.8567 }; // Pune
-                const retailerLoc = { lat: 12.9716, lng: 77.5946 }; // Bangalore
 
-                if (action === 'process' && product.status === 'harvested') {
-                     newStatus = 'processed';
-                     newHistoryEntry.status = 'Processed';
-                     newHistoryEntry.location = processorLoc;
-                } else if (action === 'ship' && product.status === 'processed') {
-                     newStatus = 'in-transit';
-                     newHistoryEntry.status = 'In Transit';
-                     newHistoryEntry.by = `Dhananjay (Distributor)`;
-                     newHistoryEntry.location = retailerLoc;
-                } else if (action === 'receive_retailer' && product.status === 'in-transit') {
-                    newStatus = 'at-retailer';
-                    newHistoryEntry.status = 'At Retailer';
-                    newHistoryEntry.by = `Dhananjay (Distributor)`;
-                    newHistoryEntry.location = retailerLoc;
-                } else if (action === 'sell' && product.status === 'at-retailer') {
-                    newStatus = 'sold';
-                    newHistoryEntry.status = 'Sold';
-                    newHistoryEntry.by = `Himanshu (Consumer)`; 
-                    newHistoryEntry.location = retailerLoc;
-                }
-
-                if (newStatus) {
+                // Logic for state transitions
+                if (action === 'process' && (product.status === 'harvested') && (currentUser.role === 'farmer' || currentUser.role === 'processor')) {
+                    newStatus = 'processed';
+                    newHistoryEntry.status = 'Processed';
+                    newHistoryEntry.location = LOCATIONS.PUNE_HUB; 
                     product.status = newStatus;
                     product.history.push(newHistoryEntry);
-                    renderAllDashboards();
+                } else if (action === 'ship' && product.status === 'processed' && currentUser.role === 'processor') {
+                    newStatus = 'in-transit';
+                    newHistoryEntry.status = 'Shipped by Processor';
+                    newHistoryEntry.location = product.history[product.history.length - 1].location; 
+                    product.status = newStatus;
+                    product.history.push(newHistoryEntry);
+                    if (!product.destination) {
+                        product.destination = LOCATIONS.BANGALORE_RETAIL; 
+                    }
+                } else if (action === 'receive_retailer' && product.status === 'in-transit' && currentUser.role === 'retailer') {
+                    newStatus = 'at-retailer';
+                    newHistoryEntry.status = 'Received by Retailer';
+                    newHistoryEntry.location = product.destination || LOCATIONS.BANGALORE_RETAIL; 
+                    product.status = newStatus;
+                    product.history.push(newHistoryEntry);
+                    delete product.destination; 
+                } else if (action === 'sell' && product.status === 'at-retailer' && currentUser.role === 'retailer') {
+                    newStatus = 'sold';
+                    newHistoryEntry.status = 'Sold';
+                    newHistoryEntry.location = product.history[product.history.length - 1].location; 
+                    product.status = newStatus;
+                    product.history.push(newHistoryEntry);
                 }
-            };
 
+                renderAllDashboards(searchInput.value);
+            };
+            
             const handleAddProduct = (e) => {
                 e.preventDefault();
-                if (!currentUser || currentUser.role !== 'farmer') return;
-
+                if (!currentUser || currentUser.role !== 'farmer') {
+                    return; 
+                }
+                
                 const name = document.getElementById('product-name').value;
                 const quantity = document.getElementById('product-quantity').value;
                 const harvestDate = document.getElementById('harvest-date').value;
-
+                
                 const newBatch = {
-                    id: `batch-${Date.now()}`,
-                    name,
-                    quantity,
+                    id: `batch-${new Date().getTime()}`,
+                    farmerId: currentUser.id, // Link to current farmer
+                    name: name,
+                    quantity: quantity,
                     status: 'harvested',
                     history: [
-                        { status: 'Harvested', by: `${currentUser.name} (Farmer)`, timestamp: new Date(harvestDate).toISOString(), location: {lat: 28.7041, lng: 77.1025} } // Delhi
+                        {
+                            status: 'Harvested',
+                            by: `${currentUser.name} (${currentUser.role})`,
+                            timestamp: new Date(harvestDate).toISOString(),
+                            location: LOCATIONS.MUMBAI_FARM 
+                        }
                     ]
                 };
-                productBatches.unshift(newBatch);
+                
+                productBatches.unshift(newBatch); 
                 renderAllDashboards();
                 addProductForm.reset();
             };
             
-            // --- MODAL & MAP ---
+            // --- MODAL & MAP FUNCTIONS ---
             
             const showTrackingModal = (productId) => {
                 const product = productBatches.find(p => p.id === productId);
                 if (!product) return;
-
-                document.getElementById('modal-title').textContent = `Journey for ${product.name}`;
                 
-                const timelineEl = document.getElementById('tracking-timeline');
-                timelineEl.innerHTML = '';
-                product.history.forEach(entry => {
-                    const item = document.createElement('li');
-                    item.className = 'timeline-item';
-                    item.innerHTML = `
-                        <p>${entry.status}</p>
-                        <span>by ${entry.by} on ${new Date(entry.timestamp).toLocaleString()}</span>
+                modalTitle.textContent = `Journey of ${product.name}`;
+                
+                trackingTimeline.innerHTML = '';
+                modalQrCodeContainer.innerHTML = '';
+                
+                // Clear any existing map layers and intervals
+                clearMapLayers();
+                
+                // Ensure map is initialized and the size is correct for the modal
+                initMap();
+                map.invalidateSize();
+
+
+                // 1. Render Timeline
+                product.history.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'timeline-item';
+                    li.innerHTML = `
+                        <p>${item.status}</p>
+                        <span>by ${item.by} at ${item.location.name}</span>
+                        <span>${new Date(item.timestamp).toLocaleString()}</span>
                     `;
-                    timelineEl.appendChild(item);
+                    trackingTimeline.appendChild(li);
                 });
+
+                // 2. Generate QR Code (as requested)
+                const trackUrl = `${window.location.href.split('#')[0]}#product=${product.id}`;
+                const qrCanvasContainer = document.getElementById('modal-qr-code');
                 
-                const qrContainer = document.getElementById('modal-qr-code');
-                qrContainer.innerHTML = '';
-                const canvas = document.createElement('canvas');
-                qrContainer.appendChild(canvas);
+                const tempCanvas = document.createElement('canvas');
+                qrCanvasContainer.appendChild(tempCanvas);
+
                 new QRious({
-                    element: canvas,
-                    value: `https://myfoodchain.app/trace?id=${product.id}`, // Scannable URL
-                    size: 150,
-                    background: '#ffffff',
-                    foreground: '#0f7b57'
+                    element: tempCanvas,
+                    value: trackUrl,
+                    size: 160,
+                    padding: 10,
+                    background: 'white',
+                    foreground: 'black'
                 });
 
-                trackingModal.classList.add('visible');
-                initializeMap(product);
-            };
-
-            const initializeMap = (product) => {
-                if(!map){
-                    map = L.map('map');
-                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    }).addTo(map);
+                // 3. Render Historical Map Route
+                const latlngs = product.history.map(item => [item.location.lat, item.location.lng]);
+                
+                if (latlngs.length > 0) {
+                     // Draw the path
+                     historicalPolyline = L.polyline(latlngs, { color: 'var(--accent-secondary)', weight: 4, opacity: 0.8 }).addTo(map);
+                    
+                    // Place markers for historical steps
+                    product.history.forEach((item, index) => {
+                         const marker = L.marker([item.location.lat, item.location.lng], {
+                             title: `${item.status} at ${item.location.name}`
+                         })
+                         .addTo(map)
+                         .bindPopup(`<b>${index + 1}. ${item.status}</b><br>${item.location.name}`);
+                         historicalMarkers.push(marker);
+                    });
+                     
+                     // Fit map view to cover all historical points
+                     map.fitBounds(historicalPolyline.getBounds().pad(0.2)); 
+                } else {
+                    // Fallback view if no history
+                    map.setView([20.5937, 78.9629], 5); 
                 }
 
-                const locations = product.history.map(h => [h.location.lat, h.location.lng]);
-                
-                if (marker) map.removeLayer(marker);
-                if (polyline) map.removeLayer(polyline);
+                // 4. Implement Live Tracking (if in-transit)
+                if (product.status === 'in-transit' && product.destination && latlngs.length > 0) {
+                    const fromLoc = product.history[product.history.length - 1].location;
+                    const toLoc = product.destination;
+                    
+                    // Mark the final destination
+                    L.marker([toLoc.lat, toLoc.lng])
+                        .addTo(map)
+                        .bindPopup(`<b>Destination</b><br>${toLoc.name}`);
+                    
+                    let progress = 0;
+                    const totalSteps = 200; // Determines simulation smoothness/duration
+                    
+                    // Start the simulated movement
+                    liveTrackingInterval = setInterval(() => {
+                        progress++;
+                        // Interpolate latitude and longitude for smooth movement
+                        const lat = fromLoc.lat + (toLoc.lat - fromLoc.lat) * (progress / totalSteps);
+                        const lng = fromLoc.lng + (toLoc.lng - fromLoc.lng) * (progress / totalSteps);
+                        
+                        const currentLatLng = [lat, lng];
 
-                if (locations.length > 0) {
-                    const lastLocation = locations[locations.length - 1];
-                     map.setView(lastLocation, 5);
-                     marker = L.marker(lastLocation).addTo(map);
-                     
-                     if (locations.length > 1) {
-                         polyline = L.polyline(locations, {color: 'blue'}).addTo(map);
-                         map.fitBounds(polyline.getBounds());
-                         // Simulate live tracking if in transit
-                         if(product.status === 'in-transit') {
-                             animateMarker(locations[locations.length-2], lastLocation);
-                         }
-                     }
+                        if (!liveMarker) {
+                            // Create the truck marker
+                            liveMarker = L.marker(currentLatLng, { icon: truckIcon }).addTo(map);
+                            liveMarker.bindPopup("<b>🚚 In Transit!</b><br>Estimated arrival soon.").openPopup();
+                        } else {
+                            // Move the existing marker
+                            liveMarker.setLatLng(currentLatLng);
+                        }
+                        
+                        // Keep the map centered on the moving marker
+                        map.panTo(currentLatLng);
+
+                        if (progress >= totalSteps) {
+                            clearInterval(liveTrackingInterval);
+                            liveTrackingInterval = null;
+                            product.status = 'at-retailer'; // Auto-update status when simulation ends
+                            product.history.push({
+                                status: 'Received by Retailer (Simulated)',
+                                by: `System`,
+                                timestamp: new Date().toISOString(),
+                                location: toLoc 
+                            });
+                            liveMarker.bindPopup("<b>Arrived at Destination!</b>").openPopup();
+                            renderAllDashboards(searchInput.value); // Refresh dashboard to show new status
+                        }
+                    }, 50); // 50ms refresh rate for smooth animation
+                }
+                
+                // Show the modal
+                trackingModal.classList.add('visible');
+            };
+
+            const closeTrackingModal = () => {
+                trackingModal.classList.remove('visible');
+                clearMapLayers(); // Clear map and interval when closing
+                try {
+                    window.location.hash = '';
+                } catch (e) {
+                    console.warn("Could not clear URL hash:", e);
                 }
             };
             
-             const animateMarker = (start, end) => {
-                let t = 0;
-                const duration = 5000; // 5 seconds animation
-                const interval = 50;
-                const steps = duration / interval;
-
-                const step = () => {
-                    if (t > steps) return;
-                    const lat = start[0] + (end[0] - start[0]) * (t / steps);
-                    const lng = start[1] + (end[1] - start[1]) * (t / steps);
-                    marker.setLatLng([lat, lng]);
-                    t++;
-                    setTimeout(step, interval);
-                };
-                step();
+            const checkUrlHash = () => {
+                const hash = window.location.hash;
+                if (hash && hash.startsWith('#product=')) {
+                    const productId = hash.substring(9); 
+                    if (productId) {
+                        setTimeout(() => {
+                           showTrackingModal(productId);
+                        }, 100);
+                    }
+                }
             };
-
-
-            const hideTrackingModal = () => {
-                trackingModal.classList.remove('visible');
-            };
-
-
-            // --- EVENT BINDING ---
+            
+            // --- EVENT LISTENERS ---
             const bindEventListeners = () => {
                 openMenuBtn.addEventListener('click', () => sideMenu.classList.add('open'));
                 closeMenuBtn.addEventListener('click', () => sideMenu.classList.remove('open'));
-                roleSelector.addEventListener('change', populateUserSelector);
-                loginBtn.addEventListener('click', login);
-                logoutBtn.addEventListener('click', logout);
-                addProductForm.addEventListener('submit', handleAddProduct);
-                document.body.addEventListener('click', handleProductAction);
                 
-                searchInput.addEventListener('input', (e) => renderAllDashboards(e.target.value));
+                // Auth listeners
+                loginForm.addEventListener('submit', handleLogin);
+                registerForm.addEventListener('submit', handleRegister);
+                logoutBtn.addEventListener('click', handleLogout);
+                
+                // Page navigation listeners
+                goToRegisterLink.addEventListener('click', () => showPage('register'));
+                goToLoginLink.addEventListener('click', () => showPage('login'));
+                sideMenuLoginBtn.addEventListener('click', () => {
+                    showPage('login');
+                    sideMenu.classList.remove('open');
+                });
+                sideMenuRegisterBtn.addEventListener('click', () => {
+                    showPage('register');
+                    sideMenu.classList.remove('open');
+                });
 
-                closeModalBtn.addEventListener('click', hideTrackingModal);
-                trackingModal.addEventListener('click', (e) => {
-                    if(e.target === trackingModal) hideTrackingModal();
+                // Dashboard listeners
+                addProductForm.addEventListener('submit', handleAddProduct);
+                closeModalBtn.addEventListener('click', closeTrackingModal);
+                
+                document.body.addEventListener('click', (e) => {
+                    if (e.target.dataset.id && (e.target.dataset.action || e.target.classList.contains('scan-btn'))) {
+                        handleProductAction(e);
+                    }
+                });
+                
+                window.addEventListener('hashchange', checkUrlHash);
+
+                searchInput.addEventListener('input', (e) => {
+                    renderAllDashboards(e.target.value);
                 });
             };
-            
-            document.getElementById("currentYear").textContent = new Date().getFullYear();
 
-            // --- START THE APP ---
+            // --- INITIALIZE APP ---
             init();
+
         });
     </script>
 </body>
 </html>
-
