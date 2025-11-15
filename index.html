@@ -108,6 +108,33 @@
             border: 1px solid #ddd;
             font-size: 1rem;
         }
+        
+        /* New Nav Item Style for Help/Info */
+        .side-menu-nav {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .nav-item {
+            display: block;
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: none;
+            border: none;
+            text-align: left;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background 150ms;
+        }
+        
+        .nav-item:hover {
+            background: #f0f4f8;
+            color: var(--accent-primary);
+        }
 
         /* --- New Auth Page Styles --- */
         #auth-container {
@@ -200,7 +227,9 @@
         
         /* --- Side Menu Auth Links --- */
         .side-menu-auth {
-            margin-bottom: 2rem;
+            margin-top: auto; /* Push to the bottom when other elements are few */
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
         }
         
         .side-menu-auth button {
@@ -357,6 +386,7 @@
             padding: 0.8rem;
             border: 1px solid #ccc;
             border-radius: var(--radius-sm);
+            font-family: var(--font-family);
         }
 
         .product-form button {
@@ -458,7 +488,7 @@
             display: none !important;
         }
         
-        /* Tracking Modal */
+        /* Modal Overlay */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -509,7 +539,7 @@
             font-size: 1.5rem;
         }
 
-        #close-modal {
+        #close-modal, #close-help-modal, #close-info-modal {
             font-size: 2rem;
             background: none;
             border: none;
@@ -529,7 +559,7 @@
         }
         
         #map {
-            height: 350px; /* Increased map height for better viewing */
+            height: 350px; 
             width: 100%;
             border-radius: var(--radius-sm);
             background-color: #eee;
@@ -560,7 +590,7 @@
         }
 
         .timeline-item:last-child {
-            border-left: 2px solid transparent; /* Remove border line after last item for visual cleanup */
+            border-left: 2px solid transparent; 
             padding-bottom: 0.5rem;
         }
         
@@ -613,7 +643,7 @@
             font-size: 1rem;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             text-align: center;
-            line-height: 26px; /* Adjust for vertical centering */
+            line-height: 26px; 
         }
 
 
@@ -707,7 +737,13 @@
             <input type="text" id="search-input" placeholder="Search Batches...">
         </div>
         
-        <!-- Updated Auth Section in Side Menu -->
+        <!-- NEW: User Directory and Help Navigation -->
+        <nav class="side-menu-nav">
+            <button class="nav-item" id="open-info-modal">User Directory</button>
+            <button class="nav-item" id="open-help-modal">Help & Support</button>
+        </nav>
+        
+        <!-- Auth Section in Side Menu -->
         <div class="side-menu-auth" id="side-menu-auth-links">
             <button id="side-menu-login-btn">Login</button>
             <button id="side-menu-register-btn" class="secondary">Register</button>
@@ -902,6 +938,57 @@
             </div>
         </div>
     </div>
+    
+    <!-- Help Desk Modal -->
+    <div class="modal-overlay" id="help-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 id="help-modal-title">Help & Support</h3>
+                <button id="close-help-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
+                    If you require assistance with tracking a batch, reporting an issue, or general inquiries, please contact our help desk via the options below.
+                </p>
+                
+                <div class="help-desk-options" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <!-- Email Option (Uses mailto: protocol) -->
+                    <div style="padding: 1rem; border: 1px solid #ddd; border-radius: 12px; background: #f9f9f9;">
+                        <h5 style="font-weight: 600; margin-bottom: 0.5rem; color: var(--accent-primary);">Contact via Email</h5>
+                        <p style="font-size: 1.1rem;">
+                            <a href="mailto:sahhimanshu467@gmail.com" style="color: #3498db; text-decoration: none; font-weight: 500;">sahhimanshu467@gmail.com</a>
+                        </p>
+                    </div>
+
+                    <!-- Phone Option (Uses tel: protocol) -->
+                    <div style="padding: 1rem; border: 1px solid #ddd; border-radius: 12px; background: #f9f9f9;">
+                        <h5 style="font-weight: 600; margin-bottom: 0.5rem; color: var(--accent-primary);">Contact via Phone</h5>
+                        <p style="font-size: 1.1rem;">
+                            <a href="tel:9341771702" style="color: #3498db; text-decoration: none; font-weight: 500;">9341771702</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: User Information Modal -->
+    <div class="modal-overlay" id="info-modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 id="info-modal-title">User Directory & Contact Information</h3>
+                <button id="close-info-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
+                    Connect directly with other users in the supply chain (Farmers, Processors, Retailers, and Consumers).
+                </p>
+                <div id="user-directory-list" style="display: grid; gap: 1rem;">
+                    <!-- User cards will be injected here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
@@ -912,7 +999,7 @@
 
             // --- MOCK BACKEND & DATA ---
             
-            // New MOCK_USERS as an array for registration
+            // MOCK_USERS holds user data for login and the new User Directory
             let MOCK_USERS = [
                 { id: 'f1', name: 'Farmer User 1', role: 'farmer', email: 'farmer@test.com', password: '123', contact: '9998887771' },
                 { id: 'd1', name: 'Processor User 1', role: 'processor', email: 'dist@test.com', password: '123', contact: '9998887772' },
@@ -931,26 +1018,26 @@
             let productBatches = [
                 {
                     id: `batch-1672531200000`, 
-                    farmerId: 'f1', // Added farmerId to link to a user
+                    farmerId: 'f1', 
                     name: 'Organic Tomatoes',
                     quantity: 200,
                     status: 'sold',
                     history: [
-                        { status: 'Harvested', by: 'Farmer User 1 (farmer)', timestamp: new Date('2025-10-26T08:00:00Z'), location: LOCATIONS.MUMBAI_FARM },
-                        { status: 'Processed', by: 'Processor User 1 (processor)', timestamp: new Date('2025-10-26T14:00:00Z'), location: LOCATIONS.PUNE_HUB },
-                        { status: 'Received by Retailer', by: 'Retailer User 1 (retailer)', timestamp: new Date('2025-10-27T09:00:00Z'), location: LOCATIONS.BANGALORE_RETAIL },
-                        { status: 'Sold', by: 'Consumer User 1 (consumer)', timestamp: new Date('2025-10-28T18:30:00Z'), location: LOCATIONS.BANGALORE_RETAIL }
+                        { status: 'Harvested', by: 'Farmer User 1 (farmer)', timestamp: new Date('2025-10-26T08:00:00Z').toISOString(), location: LOCATIONS.MUMBAI_FARM },
+                        { status: 'Processed', by: 'Processor User 1 (processor)', timestamp: new Date('2025-10-26T14:00:00Z').toISOString(), location: LOCATIONS.PUNE_HUB },
+                        { status: 'Received by Retailer', by: 'Retailer User 1 (retailer)', timestamp: new Date('2025-10-27T09:00:00Z').toISOString(), location: LOCATIONS.BANGALORE_RETAIL },
+                        { status: 'Sold', by: 'Consumer User 1 (consumer)', timestamp: new Date('2025-10-28T18:30:00Z').toISOString(), location: LOCATIONS.BANGALORE_RETAIL }
                     ]
                 },
                 {
                     id: `batch-1678886400000`, 
-                    farmerId: 'f1', // Added farmerId
+                    farmerId: 'f1', 
                     name: 'Fresh Strawberries',
                     quantity: 150,
                     status: 'in-transit', 
                     history: [
-                        { status: 'Harvested', by: 'Farmer User 1 (farmer)', timestamp: new Date('2025-11-13T10:00:00Z'), location: LOCATIONS.MUMBAI_FARM },
-                        { status: 'Processed', by: 'Processor User 1 (processor)', timestamp: new Date('2025-11-14T08:00:00Z'), location: LOCATIONS.PUNE_HUB }
+                        { status: 'Harvested', by: 'Farmer User 1 (farmer)', timestamp: new Date('2025-11-13T10:00:00Z').toISOString(), location: LOCATIONS.MUMBAI_FARM },
+                        { status: 'Processed', by: 'Processor User 1 (processor)', timestamp: new Date('2025-11-14T08:00:00Z').toISOString(), location: LOCATIONS.PUNE_HUB }
                     ],
                     destination: LOCATIONS.BANGALORE_RETAIL
                 }
@@ -962,7 +1049,7 @@
             let map;
             let liveMarker;
             let historicalPolyline;
-            let historicalMarkers = []; // Array to store historical markers
+            let historicalMarkers = []; 
             let liveTrackingInterval = null;
             
             const truckIcon = L.divIcon({
@@ -1049,6 +1136,18 @@
             const modalQrCodeContainer = document.getElementById('modal-qr-code');
             const trackingTimeline = document.getElementById('tracking-timeline');
             const modalTitle = document.getElementById('modal-title');
+            
+            // --- Help Desk Elements ---
+            const helpModal = document.getElementById('help-modal');
+            const openHelpModalBtn = document.getElementById('open-help-modal');
+            const closeHelpModalBtn = document.getElementById('close-help-modal');
+
+            // --- NEW Info Modal Elements ---
+            const infoModal = document.getElementById('info-modal');
+            const openInfoModalBtn = document.getElementById('open-info-modal');
+            const closeInfoModalBtn = document.getElementById('close-info-modal');
+            const userDirectoryList = document.getElementById('user-directory-list');
+            
             document.getElementById('currentYear').textContent = new Date().getFullYear();
 
             // --- APP LOGIC ---
@@ -1059,7 +1158,7 @@
                 showPage('login'); // Show login page by default
             };
             
-            // --- New Auth & Page Functions ---
+            // --- Auth & Page Functions ---
             
             const showPage = (pageName) => {
                 // Hide all main containers
@@ -1160,7 +1259,7 @@
                 sideMenu.classList.remove('open');
             };
 
-            // --- Existing Dashboard Functions (Modified) ---
+            // --- Dashboard Functions ---
 
             const switchView = (role) => {
                 Object.values(dashboards).forEach(d => d.classList.add('hidden'));
@@ -1170,7 +1269,7 @@
             };
             
             const renderAllDashboards = (searchTerm = '') => {
-                 if (!currentUser) return; // Don't render if logged out
+                 if (!currentUser) return; 
 
                  const lowerCaseSearchTerm = searchTerm.toLowerCase();
                  const allFilteredBatches = productBatches.filter(p => 
@@ -1178,19 +1277,19 @@
                       p.id.toLowerCase().includes(lowerCaseSearchTerm)
                  );
 
-                // --- Updated Filter Logic ---
+                // Filter logic based on role
                 if (currentUser.role === 'farmer') {
                     const farmerProducts = allFilteredBatches.filter(p => p.farmerId === currentUser.id);
                     renderProductList('farmer', farmerProducts);
                 }
                 
                 if (currentUser.role === 'processor') {
-                    const processorProducts = allFilteredBatches.filter(p => p.status === 'processed' || p.status === 'in-transit' || p.status === 'harvested'); // Let processor see harvested
+                    const processorProducts = allFilteredBatches.filter(p => p.status === 'processed' || p.status === 'in-transit' || p.status === 'harvested'); 
                     renderProductList('processor', processorProducts);
                 }
                  
                 if (currentUser.role === 'retailer') {
-                     const retailerProducts = allFilteredBatches.filter(p => p.status === 'at-retailer' || p.status === 'sold' || p.status === 'in-transit'); // Retailer can see incoming
+                     const retailerProducts = allFilteredBatches.filter(p => p.status === 'at-retailer' || p.status === 'sold' || p.status === 'in-transit');
                      renderProductList('retailer', retailerProducts);
                 }
                 
@@ -1239,7 +1338,7 @@
                         new QRious({
                             element: qrCanvas,
                             value: trackUrl,
-                            size: 100, // Smaller size for the card
+                            size: 100, 
                             padding: 5,
                             background: 'white',
                             foreground: 'black'
@@ -1263,7 +1362,7 @@
                         }
                         break;
                     case 'processor':
-                        if (product.status === 'harvested') { // Processor can now process harvested batches
+                        if (product.status === 'harvested') { 
                              actions += `<button data-action="process" data-id="${product.id}">Process Batch</button>`;
                         }
                         if (product.status === 'processed') {
@@ -1503,6 +1602,66 @@
                 }
             };
             
+            // --- Help Desk Functions ---
+            
+            const showHelpModal = () => {
+                helpModal.classList.add('visible');
+                sideMenu.classList.remove('open'); // Close side menu when opening modal
+            };
+
+            const closeHelpModal = () => {
+                helpModal.classList.remove('visible');
+            };
+
+            // --- NEW Info Modal Functions ---
+            
+            const renderUserDirectory = () => {
+                userDirectoryList.innerHTML = ''; // Clear existing content
+                
+                MOCK_USERS.forEach(user => {
+                    const userCard = document.createElement('div');
+                    userCard.className = 'user-card-directory';
+                    userCard.style.cssText = 'padding: 1.2rem; border: 1px solid #eee; border-radius: 12px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.03);';
+                    
+                    const roleColor = {
+                        farmer: 'var(--accent-primary)',
+                        processor: '#8e44ad',
+                        retailer: '#d35400',
+                        consumer: '#2980b9'
+                    }[user.role] || 'gray';
+                    
+                    userCard.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                            <h5 style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary);">${user.name}</h5>
+                            <span style="padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; font-weight: 600; text-transform: capitalize; background: ${roleColor}22; color: ${roleColor};">
+                                ${user.role}
+                            </span>
+                        </div>
+                        <p style="margin-bottom: 0.5rem;">
+                            <strong style="color: var(--text-secondary);">Email:</strong> 
+                            <a href="mailto:${user.email}" style="color: #3498db; text-decoration: none;">${user.email}</a>
+                        </p>
+                        <p>
+                            <strong style="color: var(--text-secondary);">Contact:</strong> 
+                            <a href="tel:${user.contact}" style="color: #3498db; text-decoration: none;">${user.contact}</a>
+                        </p>
+                    `;
+                    userDirectoryList.appendChild(userCard);
+                });
+            };
+            
+            const showInfoModal = () => {
+                renderUserDirectory();
+                infoModal.classList.add('visible');
+                sideMenu.classList.remove('open');
+            };
+
+            const closeInfoModal = () => {
+                infoModal.classList.remove('visible');
+            };
+
+            // --- URL Hash Tracking ---
+
             const checkUrlHash = () => {
                 const hash = window.location.hash;
                 if (hash && hash.startsWith('#product=')) {
@@ -1539,7 +1698,17 @@
 
                 // Dashboard listeners
                 addProductForm.addEventListener('submit', handleAddProduct);
+                
+                // Modal listeners
                 closeModalBtn.addEventListener('click', closeTrackingModal);
+                
+                // Help Desk listeners
+                openHelpModalBtn.addEventListener('click', showHelpModal);
+                closeHelpModalBtn.addEventListener('click', closeHelpModal);
+
+                // NEW Info Modal listeners
+                openInfoModalBtn.addEventListener('click', showInfoModal);
+                closeInfoModalBtn.addEventListener('click', closeInfoModal);
                 
                 document.body.addEventListener('click', (e) => {
                     if (e.target.dataset.id && (e.target.dataset.action || e.target.classList.contains('scan-btn'))) {
