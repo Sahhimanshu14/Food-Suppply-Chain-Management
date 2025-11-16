@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food Supply Chain Management Platform</title>
+    <!-- Leaflet CSS for maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <style>
         :root {
@@ -33,13 +34,194 @@
         body {
             font-family: var(--font-family);
             color: var(--text-primary);
-            background: #f4f7f8;
+            background: #f4f7f8; /* Light gray body bg */
             line-height: 1.6;
             min-height: 100vh;
             overflow-x: hidden;
         }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- LOGIN/REGISTER PAGE STYLES --- */
+        #login-view {
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+            width: 100%;
+            padding: 2rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .login-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            max-width: 900px;
+            width: 100%;
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .login-container {
+                grid-template-columns: 40% 60%;
+            }
+        }
+
+        .login-branding {
+            background: var(--bg-gradient);
+            color: white;
+            padding: clamp(2rem, 5vw, 4rem);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            animation: slideInLeft 0.7s var(--transition);
+        }
+
+        .login-branding h1 {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+        }
         
-        /* Slide-in Menu */
+        .login-branding p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .login-form-wrapper {
+            padding: clamp(2rem, 5vw, 4rem);
+            animation: slideInRight 0.7s var(--transition);
+        }
+        
+        .login-form-wrapper form h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid #ddd;
+            font-size: 1rem;
+            font-family: var(--font-family);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(15, 123, 87, 0.1);
+        }
+        
+        .login-btn-primary {
+            width: 100%;
+            padding: 0.9rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: var(--accent-primary);
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background var(--transition);
+        }
+        
+        .login-btn-primary:hover {
+            background: #0d6a4a;
+        }
+        
+        .form-footer {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .form-toggle-link {
+            color: var(--accent-primary);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .form-toggle-link:hover {
+            text-decoration: underline;
+        }
+        
+        .help-link {
+            display: block;
+            text-align: right;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            color: var(--text-secondary);
+            cursor: pointer; /* Changed from link to cursor */
+        }
+        
+        .help-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* --- NEW: Password validation styles --- */
+        .password-rules {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            line-height: 1.4;
+        }
+        
+        /* Style for invalid form inputs */
+        .form-group.invalid input {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        }
+        /* --- END NEW --- */
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideInRight {
+             from { transform: translateX(100%); opacity: 0; }
+             to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Keyframe for card animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* --- END LOGIN STYLES --- */
+
+
+        /* --- Slide-in Menu --- */
         .side-menu {
             position: fixed;
             top: 0;
@@ -108,153 +290,6 @@
             border: 1px solid #ddd;
             font-size: 1rem;
         }
-        
-        /* New Nav Item Style for Help/Info */
-        .side-menu-nav {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .nav-item {
-            display: block;
-            width: 100%;
-            padding: 0.8rem 1rem;
-            background: none;
-            border: none;
-            text-align: left;
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--text-primary);
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: background 150ms;
-        }
-        
-        .nav-item:hover {
-            background: #f0f4f8;
-            color: var(--accent-primary);
-        }
-
-        /* --- New Auth Page Styles --- */
-        #auth-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 90vh;
-            padding: 2rem;
-            background: var(--bg-gradient);
-        }
-
-        .auth-page {
-            width: 100%;
-            max-width: 450px;
-            background: var(--surface);
-            padding: 2.5rem;
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-soft);
-        }
-
-        .auth-page h2 {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-            color: var(--accent-primary);
-        }
-
-        .auth-form .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .auth-form .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-
-        .auth-form .form-group input,
-        .auth-form .form-group select {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid #ccc;
-            border-radius: var(--radius-sm);
-            font-size: 1rem;
-            font-family: var(--font-family);
-        }
-
-        .auth-form .auth-button {
-            width: 100%;
-            padding: 0.9rem;
-            margin-top: 1rem;
-            border-radius: var(--radius-sm);
-            border: none;
-            font-size: 1.1rem;
-            font-weight: 700;
-            background: var(--accent-primary);
-            color: white;
-            cursor: pointer;
-            transition: background var(--transition);
-        }
-
-        .auth-form .auth-button:hover {
-            background: #0d6a4a;
-        }
-
-        .auth-switch-link {
-            text-align: center;
-            margin-top: 1.5rem;
-            font-size: 0.95rem;
-        }
-
-        .auth-switch-link span {
-            color: var(--text-secondary);
-        }
-
-        .auth-switch-link a {
-            color: var(--accent-primary);
-            text-decoration: none;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .auth-error-message {
-            color: #e74c3c;
-            font-size: 0.9rem;
-            text-align: center;
-            margin-top: 1rem;
-            display: none; /* Hidden by default */
-        }
-        
-        /* --- Side Menu Auth Links --- */
-        .side-menu-auth {
-            margin-top: auto; /* Push to the bottom when other elements are few */
-            padding-top: 1rem;
-            border-top: 1px solid #eee;
-        }
-        
-        .side-menu-auth button {
-            width: 100%;
-            padding: 0.8rem;
-            margin-bottom: 0.5rem;
-            border-radius: var(--radius-sm);
-            border: 1px solid #ccc;
-            font-size: 1rem;
-            cursor: pointer;
-            background: var(--accent-primary);
-            color: white;
-            transition: background var(--transition);
-        }
-        .side-menu-auth button:hover {
-            background: #0d6a4a;
-        }
-        .side-menu-auth button.secondary {
-            background: var(--surface);
-            color: var(--accent-primary);
-            border: 1px solid var(--accent-primary);
-        }
-         .side-menu-auth button.secondary:hover {
-             background: #f0f4f8;
-         }
 
         .user-info {
             margin-top: auto;
@@ -269,18 +304,19 @@
         .user-info #logout-btn {
             width: 100%;
             padding: 0.8rem;
-            margin-top: 0.5rem;
+            margin-top: 1rem;
             border-radius: var(--radius-sm);
+            border: 1px solid #ccc;
             font-size: 1rem;
             background: #e74c3c;
             color: white;
-            border: none;
             cursor: pointer;
         }
         .user-info #logout-btn:hover {
              background: #c0392b;
         }
 
+        /* --- Main App Layout --- */
         .top-header {
             position: sticky;
             top: 0;
@@ -321,32 +357,33 @@
         }
 
         .logo {
-            width: 44px;
-            height: 44px;
-            border-radius: var(--radius-sm);
-            background: var(--accent-primary);
-            color: #fff;
-            display: grid;
-            place-items: center;
-            font-weight: 700;
-            font-size: 1.1rem;
-            letter-spacing: 1px;
-            box-shadow: var(--shadow-soft);
+          width: 44px;
+          height: 44px;
+          border-radius: var(--radius-sm);
+          background: var(--accent-primary);
+          color: #fff;
+          display: grid;
+          place-items: center;
+          font-weight: 700;
+          font-size: 1.1rem;
+          letter-spacing: 1px;
+          box-shadow: var(--shadow-soft);
         }
 
         .brand-name {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--text-primary);
+          font-size: 1.2rem;
+          font-weight: 600;
+          color: var(--text-primary);
         }
         
         .main-nav {
-            display: none; /* Replaced by side menu */
+          display: none; /* Replaced by side menu */
         }
         
         .dashboard-view {
             padding: clamp(30px, 5vw, 60px) clamp(24px, 5vw, 110px);
             min-height: 80vh;
+            background: linear-gradient(180deg, #f0f8f5, #ffffff 300px);
         }
 
         .dashboard-header {
@@ -363,6 +400,40 @@
             color: var(--text-secondary);
         }
         
+        /* Stats section for dashboards */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-stats .stat-card {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+        
+        .dashboard-stats .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .dashboard-stats .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .dashboard-stats .stat-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .dashboard-stats .stat-card h3 {
+            font-size: 2rem;
+            color: var(--accent-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .dashboard-stats .stat-card span {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        
+        /* --- Product Form & List --- */
         .product-form {
             background: var(--surface);
             padding: 2rem;
@@ -386,7 +457,6 @@
             padding: 0.8rem;
             border: 1px solid #ccc;
             border-radius: var(--radius-sm);
-            font-family: var(--font-family);
         }
 
         .product-form button {
@@ -412,12 +482,16 @@
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-card);
             padding: 1.5rem;
-            transition: transform var(--transition), box-shadow var(--transition);
+            transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+            border-left: 4px solid var(--accent-secondary); 
+            opacity: 0; /* Start hidden for animation */
+            animation: fadeInUp 0.5s ease-out forwards;
         }
         
         .product-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
             box-shadow: var(--shadow-soft);
+            border-left-color: var(--accent-primary);
         }
 
         .product-card-header {
@@ -442,33 +516,19 @@
         .status-in-transit { background: rgba(52, 152, 219, 0.2); color: #2980b9;}
         .status-at-retailer { background: rgba(230, 126, 34, 0.2); color: #d35400;}
         .status-sold { background: rgba(46, 204, 113, 0.2); color: #27ae60;}
-        .status-processed { background: rgba(142, 68, 173, 0.2); color: #8e44ad;}
 
 
         .product-card p {
             color: var(--text-secondary);
             margin-bottom: 0.5rem;
-            word-break: break-all; /* Ensure long IDs wrap */
         }
         
         .product-card p strong {
             color: var(--text-primary);
         }
-
-        /* QR CODE STYLES */
-        .card-qr-container {
-            text-align: center;
-            margin: 1rem 0 0.5rem 0;
-        }
         
-        .card-qr-container canvas {
-            border-radius: var(--radius-sm);
-            border: 4px solid var(--surface);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-        
-        /* ACTIONS */
-        .product-actions button, .scan-btn {
+        /* Button styles for hover animation */
+        .product-actions button {
             margin-top: 1rem;
             padding: 0.6rem 1rem;
             background: var(--accent-primary);
@@ -476,19 +536,39 @@
             border: none;
             border-radius: var(--radius-sm);
             cursor: pointer;
-            margin-right: 0.5rem; /* Add some spacing between buttons */
-            font-weight: 600;
+            transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s ease;
+            opacity: 0;
+            transform: translateY(10px);
+            max-height: 0;
+            margin-top: 0;
         }
         
         .scan-btn {
             background: var(--accent-earth);
-        }
-
-        .hidden {
-            display: none !important;
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 100px;
+            margin-top: 1rem;
         }
         
-        /* Modal Overlay */
+        .scan-btn:hover {
+            background: #a98d5f;
+        }
+        
+        .product-actions button:hover {
+            background: #0d6a4a;
+        }
+        
+        /* Show action buttons on card hover */
+        .product-card:hover .product-actions button {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 100px;
+            margin-top: 1rem;
+        }
+
+        
+        /* --- Tracking Modal --- */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -539,7 +619,7 @@
             font-size: 1.5rem;
         }
 
-        #close-modal, #close-help-modal, #close-info-modal {
+        #close-modal {
             font-size: 2rem;
             background: none;
             border: none;
@@ -554,27 +634,18 @@
         
         @media (min-width: 768px) {
             .tracking-layout {
-                 grid-template-columns: 1fr 1fr;
+                grid-template-columns: 1fr 1fr;
             }
         }
         
         #map {
-            height: 350px; 
+            height: 300px;
             width: 100%;
             border-radius: var(--radius-sm);
-            background-color: #eee;
-            border: 1px solid #ddd;
         }
         
         .tracking-details h4 {
             margin-bottom: 1rem;
-        }
-        
-        .tracking-details h5 {
-            font-size: 1.1rem;
-            color: var(--text-primary);
-            margin-top: 1.5rem;
-            margin-bottom: 0.5rem;
         }
 
         .timeline {
@@ -590,8 +661,7 @@
         }
 
         .timeline-item:last-child {
-            border-left: 2px solid transparent; 
-            padding-bottom: 0.5rem;
+            border-left: none;
         }
         
         .timeline-item::before {
@@ -604,13 +674,11 @@
             border-radius: 50%;
             background: var(--accent-secondary);
             border: 2px solid white;
-            box-shadow: 0 0 0 2px var(--accent-secondary);
         }
         
         .timeline-item p {
             margin: 0;
             color: var(--text-primary);
-            font-weight: 600;
         }
         .timeline-item span {
             font-size: 0.9rem;
@@ -628,26 +696,8 @@
             box-shadow: var(--shadow-card);
             border-radius: var(--radius-sm);
         }
-        
-        /* Truck Icon CSS for Leaflet Marker */
-        .truck-icon {
-            background: var(--accent-primary);
-            color: white;
-            border: 2px solid #fff;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            text-align: center;
-            line-height: 26px; 
-        }
 
-
-        /* Original styles for sections */
+        /* --- Hero Section (Consumer Dashboard) --- */
         .hero-section {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -712,6 +762,7 @@
           color: rgba(255, 255, 255, 0.75);
         }
         
+        /* --- Footer --- */
         .site-footer {
           text-align: center;
           padding: 28px 18px;
@@ -720,124 +771,476 @@
           border-top: 1px solid rgba(18, 40, 55, 0.08);
           margin-top: 2rem;
         }
+        
+        
+        /* --- CUSTOM ALERT MODAL --- */
+        .custom-alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+        .custom-alert-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .custom-alert-modal {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-soft);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .custom-alert-overlay.visible .custom-alert-modal {
+            transform: scale(1);
+        }
+        #custom-alert-message {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        #custom-alert-close-btn {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        #custom-alert-close-btn:hover {
+            background: #0d6a4a;
+        }
+        /* --- END CUSTOM ALERT --- */
+
+
+        /* --- DYNAMIC CHATBOT STYLES --- */
+        
+        /* Animation for the chat bubble to attract attention */
+        @keyframes pulseAnimation {
+            0% { transform: scale(1); box-shadow: var(--shadow-soft); }
+            50% { transform: scale(1.05); box-shadow: 0 20px 45px rgba(15, 40, 60, 0.25); }
+            100% { transform: scale(1); box-shadow: var(--shadow-soft); }
+        }
+        
+        /* Animation for new messages appearing */
+        @keyframes fadeInUpMessage {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Animation for the "..." typing indicator */
+        @keyframes typingDots {
+            0%, 20% { transform: scale(1); opacity: 0.5; }
+            40% { transform: scale(1.2); opacity: 1; }
+            60%, 100% { transform: scale(1); opacity: 0.5; }
+        }
+
+        .chat-widget-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1002;
+        }
+
+        .chat-bubble {
+            background: var(--accent-primary);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            box-shadow: var(--shadow-soft);
+            display: grid;
+            place-items: center;
+            transition: transform var(--transition), background var(--transition);
+            /* The pulsing animation */
+            animation: pulseAnimation 2s infinite ease-in-out;
+        }
+        
+        .chat-bubble:hover {
+            transform: scale(1.1);
+            background: #0d6a4a;
+            animation-play-state: paused; /* Pause animation on hover */
+        }
+        
+        .chat-bubble svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .chat-window {
+            position: fixed;
+            bottom: 6.5rem; /* 2rem (bottom) + 60px (bubble height) + 0.5rem (gap) */
+            right: 2rem;
+            width: 370px;
+            max-width: calc(100vw - 4rem);
+            height: 500px;
+            max-height: calc(100vh - 8rem);
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-soft);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            
+            /* "Pop" in animation */
+            opacity: 0;
+            transform-origin: bottom right;
+            transform: scale(0.95) translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+            visibility: hidden;
+        }
+        
+        .chat-window:not(.hidden) {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            visibility: visible;
+        }
+        
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: var(--bg-gradient);
+            color: white;
+            flex-shrink: 0; /* Prevents header from shrinking */
+        }
+        
+        .chat-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+        
+        .chat-header #close-chat-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            opacity: 0.8;
+            padding: 4px;
+        }
+        .chat-header #close-chat-btn:hover {
+            opacity: 1;
+        }
+        .chat-header #close-chat-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .chat-message {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            max-width: 85%;
+            line-height: 1.4;
+            /* Slide-in animation for each message */
+            animation: fadeInUpMessage 0.4s ease-out;
+        }
+
+        .chat-message.user {
+            background: var(--accent-secondary);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-message.bot {
+            background: #f0f4f8;
+            color: var(--text-primary);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        
+        /* Suggestion Chips */
+        .chat-suggestion-chips {
+            padding: 0.5rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            /* Messages with chips will also animate in */
+            animation: fadeInUpMessage 0.4s ease-out;
+        }
+        
+        .chat-suggestion-chip {
+            background: none;
+            border: 1px solid var(--accent-secondary);
+            color: var(--accent-secondary);
+            padding: 0.3rem 0.75rem;
+            font-size: 0.8rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .chat-suggestion-chip:hover {
+            background: rgba(18, 185, 170, 0.1);
+        }
+        
+        /* Animated Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+        }
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ccc;
+            margin: 0 2px;
+            animation: typingDots 1.4s infinite ease-in-out;
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: 0.0s; }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        
+
+        .chat-input-form {
+            display: flex;
+            border-top: 1px solid #eee;
+            padding: 0.75rem;
+            flex-shrink: 0; /* Prevents input from shrinking */
+        }
+        
+        .chat-input-form input {
+            flex-grow: 1;
+            border: 1px solid #ddd;
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+            font-size: 0.9rem;
+            margin-right: 0.5rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .chat-input-form input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(15, 123, 87, 0.1);
+        }
+        
+        .chat-input-form button {
+            border: none;
+            background: var(--accent-primary);
+            color: white;
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+            display: grid;
+            place-items: center;
+            transition: background 0.2s ease;
+        }
+        .chat-input-form button:hover {
+             background: #0d6a4a;
+        }
+        .chat-input-form button svg {
+            width: 20px;
+            height: 20px;
+        }
 
     </style>
 </head>
 <body>
 
-    <aside class="side-menu" id="side-menu">
-        <div class="side-menu-header">
-             <div class="brand">
-                 <div class="logo">FS</div>
-                 <span class="brand-name">Food Supply</span>
-             </div>
-            <button class="close-menu-btn" id="close-menu-btn">&times;</button>
-        </div>
-        <div class="search-bar">
-            <input type="text" id="search-input" placeholder="Search Batches...">
-        </div>
-        
-        <!-- NEW: User Directory and Help Navigation -->
-        <nav class="side-menu-nav">
-            <button class="nav-item" id="open-info-modal">User Directory</button>
-            <button class="nav-item" id="open-help-modal">Help & Support</button>
-        </nav>
-        
-        <!-- Auth Section in Side Menu -->
-        <div class="side-menu-auth" id="side-menu-auth-links">
-            <button id="side-menu-login-btn">Login</button>
-            <button id="side-menu-register-btn" class="secondary">Register</button>
-        </div>
-        
-        <div class="user-info hidden" id="user-info">
-            <p>Welcome, <strong id="user-name"></strong>!</p>
-            <p>Role: <strong id="user-role"></strong></p>
-            <button id="logout-btn">Logout</button>
-        </div>
-    </aside>
-
-    <header class="top-header" id="top-header">
-        <button class="mobile-nav-toggle" id="open-menu-btn" aria-label="Toggle navigation">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-        <div class="brand">
-            <div class="logo">FS</div>
-            <span class="brand-name">Food Supply Chain</span>
-        </div>
-    </header>
-
-    <!-- New Auth Container -->
-    <div id="auth-container">
-        <!-- Login Page -->
-        <div id="login-page" class="auth-page">
-            <h2>Login</h2>
-            <form id="login-form" class="auth-form">
-                <div class="form-group">
-                    <label for="login-email">Email</label>
-                    <input type="email" id="login-email" required>
+    <!-- Login View: Shown on load -->
+    <div id="login-view">
+        <div class="login-container">
+            
+            <div class="login-branding">
+                <div class="brand" style="margin-bottom: 2rem;">
+                     <div class="logo">FS</div>
+                     <span class="brand-name" style="color: white; font-size: 1.5rem;">Food Supply Chain</span>
                 </div>
-                <div class="form-group">
-                    <label for="login-password">Password</label>
-                    <input type="password" id="login-password" required>
-                </div>
-                <p id="login-error" class="auth-error-message">Invalid email or password.</p>
-                <button type="submit" class="auth-button">Login</button>
-            </form>
-            <p class="auth-switch-link">
-                <span>Don't have an account?</span>
-                <a id="go-to-register-link">Register</a>
-            </p>
-        </div>
-
-        <!-- Register Page -->
-        <div id="register-page" class="auth-page hidden">
-            <h2>Register</h2>
-            <form id="register-form" class="auth-form">
-                <div class="form-group">
-                    <label for="register-role">I am a:</label>
-                    <select id="register-role">
-                        <option value="consumer">Consumer</option>
-                        <option value="farmer">Farmer</option>
-                        <option value="processor">Processor</option>
-                        <option value="retailer">Retailer</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="register-name">Full Name</label>
-                    <input type="text" id="register-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="register-email">Email</label>
-                    <input type="email" id="register-email" required>
-                </div>
-                <div class="form-group">
-                    <label for="register-password">Password</label>
-                    <input type="password" id="register-password" required>
-                </div>
-                <div class="form-group">
-                    <label for="register-contact">Contact No.</label>
-                    <input type="tel" id="register-contact" required>
-                </div>
-                <p id="register-error" class="auth-error-message">This email is already registered.</p>
-                <button type="submit" class="auth-button">Register</button>
-            </form>
-            <p class="auth-switch-link">
-                <span>Already have an account?</span>
-                <a id="go-to-login-link">Login</a>
-            </p>
+                <h1>Traceability. Transparency. Trust.</h1>
+                <p>Join our platform to track your food from the farm to your table.</p>
+            </div>
+            
+            <div class="login-form-wrapper">
+                
+                <form id="login-form-element">
+                    <h2>Welcome Back!</h2>
+                    <div class="form-group">
+                        <!-- UPDATED: Label and input field for email or phone -->
+                        <label for="login-email-phone">Email or Phone Number</label>
+                        <input type="text" id="login-email-phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required>
+                        <a id="show-forgot-password-link" class="help-link">Need help?</a>
+                    </div>
+                    <button type="submit" class="login-btn-primary">Login</button>
+                    <div class="form-footer">
+                        Don't have an account? <a href="#" id="show-register-link" class="form-toggle-link">Register</a>
+                    </div>
+                </form>
+                
+                <!-- Register Form -->
+                <form id="register-form-element" class="hidden">
+                    <h2>Create Your Account</h2>
+                    <div class="form-group">
+                        <label for="register-name">Full Name (User Info)</label>
+                        <input type="text" id="register-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-contact">Contact Number</label>
+                        <input type="tel" id="register-contact" required>
+                    </div>
+                     <div class="form-group">
+                        <label for="register-role">Select Your Role</label>
+                        <select id="register-role" required>
+                            <option value="consumer">Consumer</option>
+                            <option value="farmer">Farmer</option>
+                            <option value="distributor">Distributor</option>
+                            <option value="retailer">Retailer</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" required>
+                        <!-- NEW: Password rules helper text -->
+                        <p class="password-rules hidden">Must be at least 8 characters and include letters, numbers, and symbols (e.g., !@#$).</p>
+                    </div>
+                    <button type="submit" class="login-btn-primary">Register</button>
+                    <div class="form-footer">
+                        Already have an account? <a href="#" id="show-login-link" class="form-toggle-link">Login</a>
+                    </div>
+                </form>
+                
+                <!-- Forgot Password Form -->
+                <form id="forgot-password-form" class="hidden">
+                    <h2>Forgot Password</h2>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem;">Enter your registered email or phone number to receive an OTP.</p>
+                    <div class="form-group">
+                        <label for="forgot-email-phone">Email or Phone Number</label>
+                        <input type="text" id="forgot-email-phone" required>
+                    </div>
+                    <button type="submit" class="login-btn-primary">Send OTP</button>
+                    <div class="form-footer">
+                        Remembered your password? <a href="#" id="forgot-show-login-link" class="form-toggle-link">Login</a>
+                    </div>
+                </form>
+                
+                <!-- OTP Form -->
+                <form id="otp-form" class="hidden">
+                    <h2>Enter OTP</h2>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem;">A 4-digit OTP was sent to your registered contact.</p>
+                    <div class="form-group">
+                        <label for="otp-input">4-Digit OTP</label>
+                        <input type="text" id="otp-input" required maxlength="4">
+                    </div>
+                    <button type="submit" class="login-btn-primary">Verify OTP</button>
+                    <div class="form-footer">
+                        Back to <a href="#" id="otp-show-login-link" class="form-toggle-link">Login</a>
+                    </div>
+                </form>
+                
+                <!-- Reset Password Form -->
+                <form id="reset-password-form" class="hidden">
+                    <h2>Reset Password</h2>
+                     <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem;">Please create a new password.</p>
+                    <div class="form-group">
+                        <label for="new-password">New Password</label>
+                        <input type="password" id="new-password" required>
+                        <!-- NEW: Password rules helper text -->
+                        <p class="password-rules hidden">Must be at least 8 characters and include letters, numbers, and symbols (e.g., !@#$).</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm New Password</label>
+                        <input type="password" id="confirm-password" required>
+                    </div>
+                    <button type="submit" class="login-btn-primary">Reset Password</button>
+                    <div class="form-footer">
+                        Back to <a href="#" id="reset-show-login-link" class="form-toggle-link">Login</a>
+                    </div>
+                </form>
+                
+            </div>
         </div>
     </div>
 
-    <!-- Main Dashboard Container (hidden by default) -->
-    <div id="main-container" class="hidden">
+    <!-- Main Application: Hidden until login -->
+    <div id="app-container" class="hidden">
+        
+        <!-- Side Menu -->
+        <aside class="side-menu" id="side-menu">
+            <div class="side-menu-header">
+                 <div class="brand">
+                     <div class="logo">FS</div>
+                     <span class="brand-name">Food Supply</span>
+                 </div>
+                <button class="close-menu-btn" id="close-menu-btn">&times;</button>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Search Batches...">
+            </div>
+            
+            <div class="user-info hidden" id="user-info">
+                <p>Welcome, <strong id="user-name"></strong>!</p>
+                <p>Role: <strong id="user-role"></strong></p>
+                <button id="logout-btn">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Top Header Bar -->
+        <header class="top-header">
+            <button class="mobile-nav-toggle" id="open-menu-btn" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="brand">
+                <div class="logo">FS</div>
+                <span class="brand-name">Food Supply Chain</span>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
         <main>
-            <div id="consumer-dashboard" class="dashboard-view">
+            <!-- Consumer Dashboard -->
+             <div id="consumer-dashboard" class="dashboard-view">
                 <section class="hero-section">
                     <div class="hero-content">
                         <h1>Trace Your Food Journey</h1>
-                        <p>Farm → Processor → Retailer → You</p>
+                        <p>Farm → Processor → Distributor → Retailer → You</p>
                     </div>
                     <div class="hero-visual">
                         <div class="hero-badge">Trusted by Farms & Retailers</div>
@@ -857,20 +1260,37 @@
                         </div>
                     </div>
                 </section>
-                <div class="dashboard-header" style="margin-top: 3rem;">
+                 <div class="dashboard-header" style="margin-top: 3rem;">
                     <h2>All Products</h2>
-                    <p>Scan a product's QR code or click "View Journey" to see its full details.</p>
+                    <p>Scan a product's QR code to see its full journey.</p>
                 </div>
                 <div id="consumer-product-list" class="product-list">
-                    <!-- Product cards will be injected here -->
+                    <!-- Product cards will be injected here by JS -->
                 </div>
             </div>
 
+            <!-- Farmer Dashboard -->
             <div id="farmer-dashboard" class="dashboard-view hidden">
                 <div class="dashboard-header">
                     <h2>Farmer Dashboard</h2>
                     <p>Manage your produce batches from harvest to shipment.</p>
                 </div>
+                
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <h3 id="farmer-stat-total">0</h3>
+                        <span>Total Batches</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="farmer-stat-harvested">0</h3>
+                        <span>Harvested</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="farmer-stat-transit">0</h3>
+                        <span>In Transit</span>
+                    </div>
+                </div>
+                
                 <div class="product-form">
                     <h3>Add New Product Batch</h3>
                     <form id="add-product-form">
@@ -882,432 +1302,482 @@
                         <button type="submit">Add Batch</button>
                     </form>
                 </div>
-                <h3>Your Batches</h3>
-                <div id="farmer-product-list" class="product-list"></div>
-            </div>
-
-            <div id="processor-dashboard" class="dashboard-view hidden">
-                <div class="dashboard-header">
-                    <h2>Processor Dashboard</h2>
-                    <p>Track and manage incoming and outgoing batches.</p>
+                 <h3>Your Batches</h3>
+                <div id="farmer-product-list" class="product-list">
+                    <!-- Product cards will be injected here by JS -->
                 </div>
-                <h3>Batches to Process</h3>
-                <div id="processor-product-list" class="product-list"></div>
             </div>
 
+            <!-- Distributor Dashboard -->
+            <div id="distributor-dashboard" class="dashboard-view hidden">
+                 <div class="dashboard-header">
+                    <h2>Distributor Dashboard</h2>
+                    <p>Track and manage incoming and outgoing shipments.</p>
+                </div>
+                
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <h3 id="dist-stat-total">0</h3>
+                        <span>Total Batches</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="dist-stat-processed">0</h3>
+                        <span>Processed</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="dist-stat-transit">0</h3>
+                        <span>In Transit</span>
+                    </div>
+                </div>
+                
+                <h3>Assigned Batches</h3>
+                <div id="distributor-product-list" class="product-list">
+                    <!-- Product cards will be injected here by JS -->
+                </div>
+            </div>
+
+            <!-- Retailer Dashboard -->
             <div id="retailer-dashboard" class="dashboard-view hidden">
-                <div class="dashboard-header">
+                 <div class="dashboard-header">
                     <h2>Retailer Dashboard</h2>
                     <p>Manage inventory and track product origins.</p>
                 </div>
-                <h3>Store Inventory</h3>
-                <div id="retailer-product-list" class="product-list"></div>
+                
+                 <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <h3 id="retail-stat-total">0</h3>
+                        <span>Total Batches</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="retail-stat-instore">0</h3>
+                        <span>At Retailer</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="retail-stat-sold">0</h3>
+                        <span>Sold</span>
+                    </div>
+                </div>
+                
+                <h3>Received Batches</h3>
+                <div id="retailer-product-list" class="product-list">
+                    <!-- Product cards will be injected here by JS -->
+                </div>
             </div>
             
         </main>
         
+        <!-- Footer -->
         <footer class="site-footer">
             <p>© <span id="currentYear"></span> Food Supply Chain Management Platform</p>
         </footer>
-    </div>
 
-    <!-- Tracking Modal -->
-    <div class="modal-overlay" id="tracking-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-title">Product Journey</h3>
-                <button id="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="tracking-layout">
-                    <div class="map-container">
-                         <h4>Live Tracking</h4>
-                         <!-- Leaflet Map Container -->
-                         <div id="map"></div>
-                    </div>
-                    <div class="tracking-details">
-                        <h4>Timeline</h4>
-                        <ul id="tracking-timeline" class="timeline"></ul>
-                        
-                        <h5>Scan to Track</h5>
-                        <div id="modal-qr-code" class="qr-code-container">
-                            <!-- QR Code will be generated here -->
+        <!-- Tracking Modal (popup) -->
+        <div class="modal-overlay" id="tracking-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">Product Journey</h3>
+                    <button id="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="tracking-layout">
+                        <div class="map-container">
+                             <h4>Live Tracking</h4>
+                             <div id="map"></div>
+                        </div>
+                        <div class="tracking-details">
+                            <h4>Timeline</h4>
+                            <ul id="tracking-timeline" class="timeline">
+                                <!-- Timeline items injected by JS -->
+                            </ul>
+                            <div id="modal-qr-code" class="qr-code-container">
+                                <!-- QR code canvas injected by JS -->
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- =============== DYNAMIC CHATBOT UI =============== -->
+        <!-- MOVED: Chatbot HTML is now inside the #app-container -->
+        <div class="chat-widget-container">
+            
+            <!-- The Chat Window (hidden by default) -->
+            <div id="chat-window" class="chat-window hidden">
+                <div class="chat-header">
+                    <h3>AI Assistant</h3>
+                    <button id="close-chat-btn" aria-label="Close Chat">
+                        <!-- Close Icon -->
+                        <svg fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px" height="24px"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+                    </button>
+                </div>
+                <div id="chat-messages" class="chat-messages">
+                    <!-- Welcome message with suggestions -->
+                    <div class="chat-message bot">
+                        Hello! I'm your AI assistant. I can help you find information about product batches.
+                        <div class="chat-suggestion-chips">
+                            <button class="chat-suggestion-chip">What is the status of the apples?</button>
+                            <button class="chat-suggestion-chip">How many batches are there?</button>
+                            <button class="chat-suggestion-chip">Who am I logged in as?</button>
+                        </div>
+                    </div>
+                    <!-- Chat messages will be injected here by JS -->
+                </div>
+                <form id="chat-form" class="chat-input-form">
+                    <input type="text" id="chat-input" placeholder="Ask about a batch..." required>
+                    <button type="submit" aria-label="Send Message">
+                        <!-- Send Icon -->
+                        <svg fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px" height="24px"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                    </button>
+                </form>
+            </div>
+            
+            <!-- The Chat Toggle Bubble -->
+            <button id="chat-toggle-btn" class="chat-bubble" aria-label="Open Chat">
+                <!-- Chat Icon -->
+                <svg fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px" height="24px"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            </button>
+        </div>
+        <!-- ============================================== -->
+
+    </div> <!-- End #app-container -->
+    
+    <!-- Custom Alert Modal HTML -->
+    <div class="custom-alert-overlay" id="custom-alert-modal">
+        <div class="custom-alert-modal">
+            <p id="custom-alert-message">This is an alert message!</p>
+            <button id="custom-alert-close-btn">OK</button>
+        </div>
     </div>
     
-    <!-- Help Desk Modal -->
-    <div class="modal-overlay" id="help-modal">
-        <div class="modal-content" style="max-width: 500px;">
-            <div class="modal-header">
-                <h3 id="help-modal-title">Help & Support</h3>
-                <button id="close-help-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
-                    If you require assistance with tracking a batch, reporting an issue, or general inquiries, please contact our help desk via the options below.
-                </p>
-                
-                <div class="help-desk-options" style="display: flex; flex-direction: column; gap: 1rem;">
-                    <!-- Email Option (Uses mailto: protocol) -->
-                    <div style="padding: 1rem; border: 1px solid #ddd; border-radius: 12px; background: #f9f9f9;">
-                        <h5 style="font-weight: 600; margin-bottom: 0.5rem; color: var(--accent-primary);">Contact via Email</h5>
-                        <p style="font-size: 1.1rem;">
-                            <a href="mailto:sahhimanshu467@gmail.com" style="color: #3498db; text-decoration: none; font-weight: 500;">sahhimanshu467@gmail.com</a>
-                        </p>
-                    </div>
-
-                    <!-- Phone Option (Uses tel: protocol) -->
-                    <div style="padding: 1rem; border: 1px solid #ddd; border-radius: 12px; background: #f9f9f9;">
-                        <h5 style="font-weight: 600; margin-bottom: 0.5rem; color: var(--accent-primary);">Contact via Phone</h5>
-                        <p style="font-size: 1.1rem;">
-                            <a href="tel:9341771702" style="color: #3498db; text-decoration: none; font-weight: 500;">9341771702</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- NEW: User Information Modal -->
-    <div class="modal-overlay" id="info-modal">
-        <div class="modal-content" style="max-width: 700px;">
-            <div class="modal-header">
-                <h3 id="info-modal-title">User Directory & Contact Information</h3>
-                <button id="close-info-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
-                    Connect directly with other users in the supply chain (Farmers, Processors, Retailers, and Consumers).
-                </p>
-                <div id="user-directory-list" style="display: grid; gap: 1rem;">
-                    <!-- User cards will be injected here by JavaScript -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-
+    <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <!-- Leaflet JS Library for Mapping -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Main Application & Chatbot JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
             // --- MOCK BACKEND & DATA ---
             
-            // MOCK_USERS holds user data for login and the new User Directory
-            let MOCK_USERS = [
-                { id: 'f1', name: 'Farmer User 1', role: 'farmer', email: 'farmer@test.com', password: '123', contact: '9998887771' },
-                { id: 'd1', name: 'Processor User 1', role: 'processor', email: 'dist@test.com', password: '123', contact: '9998887772' },
-                { id: 'r1', name: 'Retailer User 1', role: 'retailer', email: 'retail@test.com', password: '123', contact: '9998887773' },
-                { id: 'c1', name: 'Consumer User 1', role: 'consumer', email: 'consumer@test.com', password: '123', contact: '9998887774' },
+            let MOCK_USERS_DB = [
+                { id: 'f1', name: 'Farmer User 1', email: 'farmer@test.com', password: 'password', role: 'farmer', contact: '1234567890' },
+                { id: 'd1', name: 'Distributor User 1', email: 'distributor@test.com', password: 'password', role: 'distributor', contact: '1234567890' },
+                { id: 'r1', name: 'Retailer User 1', email: 'retailer@test.com', password: 'password', role: 'retailer', contact: '1234567890' },
+                { id: 'c1', name: 'Consumer User 1', email: 'consumer@test.com', password: 'password', role: 'consumer', contact: '1234567890' }
             ];
-            
-            // Location constants
-            const LOCATIONS = {
-                MUMBAI_FARM: { lat: 19.0760, lng: 72.8777, name: "Mumbai Farm" },
-                PUNE_HUB: { lat: 18.5204, lng: 73.8567, name: "Pune Processing Hub" },
-                BANGALORE_RETAIL: { lat: 12.9716, lng: 77.5946, name: "Bangalore Retail Store" },
-                DELHI_HUB: { lat: 28.7041, lng: 77.1025, name: "Delhi Distribution" }
-            };
 
+            // Mock data for product batches
             let productBatches = [
                 {
-                    id: `batch-1672531200000`, 
-                    farmerId: 'f1', 
+                    id: `batch-1672531200000`,
                     name: 'Organic Tomatoes',
                     quantity: 200,
                     status: 'sold',
                     history: [
-                        { status: 'Harvested', by: 'Farmer User 1 (farmer)', timestamp: new Date('2025-10-26T08:00:00Z').toISOString(), location: LOCATIONS.MUMBAI_FARM },
-                        { status: 'Processed', by: 'Processor User 1 (processor)', timestamp: new Date('2025-10-26T14:00:00Z').toISOString(), location: LOCATIONS.PUNE_HUB },
-                        { status: 'Received by Retailer', by: 'Retailer User 1 (retailer)', timestamp: new Date('2025-10-27T09:00:00Z').toISOString(), location: LOCATIONS.BANGALORE_RETAIL },
-                        { status: 'Sold', by: 'Consumer User 1 (consumer)', timestamp: new Date('2025-10-28T18:30:00Z').toISOString(), location: LOCATIONS.BANGALORE_RETAIL }
+                        { status: 'Harvested', by: 'Farmer User 1 (Farmer)', timestamp: new Date('2024-10-26T08:00:00Z'), location: { lat: 19.0760, lng: 72.8777 } },
+                        { status: 'Processed', by: 'Distributor User 1 (Processor)', timestamp: new Date('2024-10-26T14:00:00Z'), location: { lat: 18.5204, lng: 73.8567 } },
+                        { status: 'In Transit', by: 'Retailer User 1 (Distributor)', timestamp: new Date('2024-10-27T09:00:00Z'), location: { lat: 12.9716, lng: 77.5946 } },
+                        { status: 'Sold', by: 'Consumer User 1 (Consumer)', timestamp: new Date('2024-10-28T18:30:00Z'), location: { lat: 12.9716, lng: 77.5946 } }
                     ]
                 },
                 {
-                    id: `batch-1678886400000`, 
-                    farmerId: 'f1', 
-                    name: 'Fresh Strawberries',
-                    quantity: 150,
-                    status: 'in-transit', 
+                    id: `batch-1672531200001`,
+                    name: 'Organic Apples',
+                    quantity: 500,
+                    status: 'at-retailer',
                     history: [
-                        { status: 'Harvested', by: 'Farmer User 1 (farmer)', timestamp: new Date('2025-11-13T10:00:00Z').toISOString(), location: LOCATIONS.MUMBAI_FARM },
-                        { status: 'Processed', by: 'Processor User 1 (processor)', timestamp: new Date('2025-11-14T08:00:00Z').toISOString(), location: LOCATIONS.PUNE_HUB }
-                    ],
-                    destination: LOCATIONS.BANGALORE_RETAIL
+                        { status: 'Harvested', by: 'Farmer User 1 (Farmer)', timestamp: new Date('2024-10-27T09:00:00Z'), location: { lat: 19.0760, lng: 72.8777 } },
+                        { status: 'In Transit (to Processor)', by: 'Farmer User 1 (Farmer)', timestamp: new Date('2024-10-27T11:00:00Z'), location: { lat: 19.0760, lng: 72.8777 } },
+                        { status: 'Processed', by: 'Distributor User 1 (Processor)', timestamp: new Date('2024-10-27T18:00:00Z'), location: { lat: 18.5204, lng: 73.8567 } },
+                        { status: 'In Transit (to Retailer)', by: 'Distributor User 1 (Processor)', timestamp: new Date('2024-10-28T10:00:00Z'), location: { lat: 18.5204, lng: 73.8567 } },
+                        { status: 'Received at Retailer', by: 'Retailer User 1 (Retailer)', timestamp: new Date('2024-10-29T11:00:00Z'), location: { lat: 12.9716, lng: 77.5946 } },
+                    ]
                 }
             ];
             
             let currentUser = null;
-            
-            // --- Map & Tracking Variables ---
-            let map;
-            let liveMarker;
-            let historicalPolyline;
-            let historicalMarkers = []; 
-            let liveTrackingInterval = null;
-            
-            const truckIcon = L.divIcon({
-                className: 'truck-icon',
-                html: '🚚',
-                iconSize: [30, 30],
-                iconAnchor: [15, 15]
-            });
-            
-            // --- Map Utility Functions ---
-            
-            const initMap = () => {
-                 if (!map) {
-                    map = L.map('map');
-                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    }).addTo(map);
-                }
-            }
+            let map; // Leaflet map instance
+            let polyline; // Leaflet polyline instance
 
-            const clearMapLayers = () => {
-                if (liveTrackingInterval) {
-                    clearInterval(liveTrackingInterval);
-                    liveTrackingInterval = null;
-                }
-                if (liveMarker) {
-                    liveMarker.remove();
-                    liveMarker = null;
-                }
-                if (historicalPolyline) {
-                    historicalPolyline.remove();
-                    historicalPolyline = null;
-                }
-                historicalMarkers.forEach(marker => marker.remove());
-                historicalMarkers = [];
-            }
+            // --- DOM ELEMENTS (Main App) ---
             
-            // --- DOM ELEMENTS ---
+            const loginView = document.getElementById('login-view');
+            const appContainer = document.getElementById('app-container');
+            const loginFormElement = document.getElementById('login-form-element');
+            const registerFormElement = document.getElementById('register-form-element');
+            const showRegisterLink = document.getElementById('show-register-link');
+            const showLoginLink = document.getElementById('show-login-link');
+            
+            // Password reset DOM elements
+            const forgotPasswordForm = document.getElementById('forgot-password-form');
+            const otpForm = document.getElementById('otp-form');
+            const resetPasswordForm = document.getElementById('reset-password-form');
+            const showForgotPasswordLink = document.getElementById('show-forgot-password-link');
+            const forgotShowLoginLink = document.getElementById('forgot-show-login-link');
+            const otpShowLoginLink = document.getElementById('otp-show-login-link');
+            const resetShowLoginLink = document.getElementById('reset-show-login-link');
+            
+            // Custom Alert DOM elements
+            const customAlertModal = document.getElementById('custom-alert-modal');
+            const customAlertMessage = document.getElementById('custom-alert-message');
+            const customAlertCloseBtn = document.getElementById('custom-alert-close-btn');
+            
             const openMenuBtn = document.getElementById('open-menu-btn');
             const closeMenuBtn = document.getElementById('close-menu-btn');
             const sideMenu = document.getElementById('side-menu');
-            const searchInput = document.getElementById('search-input');
-            const topHeader = document.getElementById('top-header');
-
-            // --- Auth Elements ---
-            const authContainer = document.getElementById('auth-container');
-            const mainContainer = document.getElementById('main-container');
-            const loginPage = document.getElementById('login-page');
-            const registerPage = document.getElementById('register-page');
-            const loginForm = document.getElementById('login-form');
-            const registerForm = document.getElementById('register-form');
-            const loginError = document.getElementById('login-error');
-            const registerError = document.getElementById('register-error');
-            const goToRegisterLink = document.getElementById('go-to-register-link');
-            const goToLoginLink = document.getElementById('go-to-login-link');
-            
-            // --- Side Menu Auth Elements ---
-            const sideMenuAuthLinks = document.getElementById('side-menu-auth-links');
-            const sideMenuLoginBtn = document.getElementById('side-menu-login-btn');
-            const sideMenuRegisterBtn = document.getElementById('side-menu-register-btn');
-            const userInfo = document.getElementById('user-info');
             const logoutBtn = document.getElementById('logout-btn');
-
-            // --- Dashboard Elements ---
+            const userInfo = document.getElementById('user-info');
+            const searchInput = document.getElementById('search-input');
+            
+            // Caching all dashboard elements
             const dashboards = {
                 consumer: document.getElementById('consumer-dashboard'),
                 farmer: document.getElementById('farmer-dashboard'),
-                processor: document.getElementById('processor-dashboard'),
+                distributor: document.getElementById('distributor-dashboard'),
                 retailer: document.getElementById('retailer-dashboard'),
             };
 
+            // Caching all product list elements
             const productLists = {
                 consumer: document.getElementById('consumer-product-list'),
                 farmer: document.getElementById('farmer-product-list'),
-                processor: document.getElementById('processor-product-list'),
+                distributor: document.getElementById('distributor-product-list'),
                 retailer: document.getElementById('retailer-product-list'),
             };
 
             const addProductForm = document.getElementById('add-product-form');
-            
-            // --- Modal Elements ---
             const trackingModal = document.getElementById('tracking-modal');
             const closeModalBtn = document.getElementById('close-modal');
-            const modalQrCodeContainer = document.getElementById('modal-qr-code');
-            const trackingTimeline = document.getElementById('tracking-timeline');
-            const modalTitle = document.getElementById('modal-title');
             
-            // --- Help Desk Elements ---
-            const helpModal = document.getElementById('help-modal');
-            const openHelpModalBtn = document.getElementById('open-help-modal');
-            const closeHelpModalBtn = document.getElementById('close-help-modal');
-
-            // --- NEW Info Modal Elements ---
-            const infoModal = document.getElementById('info-modal');
-            const openInfoModalBtn = document.getElementById('open-info-modal');
-            const closeInfoModalBtn = document.getElementById('close-info-modal');
-            const userDirectoryList = document.getElementById('user-directory-list');
+            // variables for password reset
+            let tempUserForPasswordReset = null;
+            let generatedOTP = null; // Variable to store the generated OTP
             
-            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            // --- APP LOGIC (Main App) ---
+            
+            /**
+             * Shows the custom alert modal.
+             * @param {string} message - The message to display.
+             */
+            const showCustomAlert = (message) => {
+                customAlertMessage.textContent = message;
+                customAlertModal.classList.add('visible');
+            };
+            
+            /**
+             * Hides the custom alert modal.
+             */
+            const hideCustomAlert = () => {
+                customAlertModal.classList.remove('visible');
+            };
+            
+            /**
+             * NEW: Validates password strength.
+             * @param {string} password - The password to check.
+             * @returns {boolean} - True if the password is valid, false otherwise.
+             */
+            const isValidPassword = (password) => {
+                const hasMinLength = password.length >= 8;
+                const hasLetter = /[a-zA-Z]/.test(password);
+                const hasNumber = /\d/.test(password);
+                // Basic symbol check
+                const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+                return hasMinLength && hasLetter && hasNumber && hasSymbol;
+            };
+            
 
-            // --- APP LOGIC ---
-
-            const init = () => {
+            /**
+             * Initializes the main application, binds event listeners, and shows the login screen.
+             */
+            const initApp = () => {
                 bindEventListeners();
-                updateUIForLogout(); // Start in logged-out state
-                showPage('login'); // Show login page by default
+                renderAllDashboards(); // Initial render (will be empty)
+                loginView.classList.remove('hidden');
+                appContainer.classList.add('hidden');
             };
             
-            // --- Auth & Page Functions ---
-            
-            const showPage = (pageName) => {
-                // Hide all main containers
-                authContainer.classList.add('hidden');
-                mainContainer.classList.add('hidden');
-                topHeader.classList.add('hidden');
-                
-                // Hide auth sub-pages
-                loginPage.classList.add('hidden');
-                registerPage.classList.add('hidden');
-
-                if (pageName === 'login') {
-                    authContainer.classList.remove('hidden');
-                    loginPage.classList.remove('hidden');
-                } else if (pageName === 'register') {
-                    authContainer.classList.remove('hidden');
-                    registerPage.classList.remove('hidden');
-                } else if (pageName === 'dashboard') {
-                    mainContainer.classList.remove('hidden');
-                    topHeader.classList.remove('hidden');
-                }
-            };
-            
+            /**
+             * Handles user login attempt.
+             */
             const handleLogin = (e) => {
                 e.preventDefault();
-                loginError.style.display = 'none';
-                const email = document.getElementById('login-email').value;
+                // UPDATED: Get value from the new 'email-or-phone' input
+                const emailOrPhone = document.getElementById('login-email-phone').value;
                 const password = document.getElementById('login-password').value;
                 
-                const user = MOCK_USERS.find(u => u.email === email && u.password === password);
+                // UPDATED: Find user by email OR phone
+                const user = MOCK_USERS_DB.find(u => (u.email === emailOrPhone || u.contact === emailOrPhone));
                 
                 if (user) {
-                    currentUser = user;
-                    updateUIForLogin();
-                    showPage('dashboard');
-                    loginForm.reset();
+                    if (user.password === password) {
+                        postLoginSetup(user);
+                        loginFormElement.reset();
+                    } else {
+                        showCustomAlert('Invalid credentials. Please try again.');
+                    }
                 } else {
-                    loginError.style.display = 'block';
+                    showCustomAlert('No account found with this email or phone number. Please register first.');
                 }
             };
-
+            
+            /**
+             * Handles new user registration.
+             */
             const handleRegister = (e) => {
                 e.preventDefault();
-                registerError.style.display = 'none';
-                
-                const role = document.getElementById('register-role').value;
                 const name = document.getElementById('register-name').value;
                 const email = document.getElementById('register-email').value;
-                const password = document.getElementById('register-password').value;
                 const contact = document.getElementById('register-contact').value;
+                const role = document.getElementById('register-role').value;
+                const password = document.getElementById('register-password').value;
+                const passwordInputEl = document.getElementById('register-password');
                 
-                const existingUser = MOCK_USERS.find(u => u.email === email);
+                // --- NEW: Password Validation ---
+                if (!isValidPassword(password)) {
+                    showCustomAlert('Password is not strong enough. It must be at least 8 characters and include letters, numbers, and symbols (e.g., !@#$).');
+                    // Add invalid class to parent form-group
+                    passwordInputEl.closest('.form-group').classList.add('invalid');
+                    return;
+                }
+                // Remove invalid class if it was there
+                passwordInputEl.closest('.form-group').classList.remove('invalid');
+                // --- END NEW ---
                 
-                if (existingUser) {
-                    registerError.style.display = 'block';
+                if (MOCK_USERS_DB.find(u => u.email === email)) {
+                    showCustomAlert('An account with this email already exists.');
                     return;
                 }
                 
                 const newUser = {
-                    id: `user-${new Date().getTime()}`,
-                    role, name, email, password, contact
+                    id: `user-${Date.now()}`,
+                    name: name,
+                    email: email,
+                    password: password,
+                    role: role,
+                    contact: contact
                 };
                 
-                MOCK_USERS.push(newUser);
-                console.log('Registered new user:', newUser);
-                registerForm.reset();
-                showPage('login'); // Go to login page after successful registration
-            };
-            
-            const handleLogout = () => {
-                currentUser = null;
-                updateUIForLogout();
-                showPage('login');
+                MOCK_USERS_DB.push(newUser);
+                showCustomAlert('Registration successful! Please log in.');
+                registerFormElement.reset();
+                loginFormElement.classList.remove('hidden');
+                registerFormElement.classList.add('hidden');
             };
 
-            const updateUIForLogin = () => {
-                // Update side menu
-                sideMenuAuthLinks.classList.add('hidden');
+            /**
+             * Sets up the app state after a successful login.
+             * @param {object} user - The logged-in user object.
+             */
+            const postLoginSetup = (user) => {
+                currentUser = user;
+                
+                loginView.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+                
                 userInfo.classList.remove('hidden');
                 document.getElementById('user-name').textContent = currentUser.name;
                 document.getElementById('user-role').textContent = currentUser.role;
-                sideMenu.classList.remove('open');
                 
-                // Set correct dashboard view
                 switchView(currentUser.role);
-                renderAllDashboards();
-                
-                // Check for URL hash now that user is logged in
-                checkUrlHash();
-            };
-
-            const updateUIForLogout = () => {
-                // Update side menu
-                sideMenuAuthLinks.classList.remove('hidden');
-                userInfo.classList.add('hidden');
-                document.getElementById('user-name').textContent = '';
-                document.getElementById('user-role').textContent = '';
                 sideMenu.classList.remove('open');
+                renderAllDashboards();
             };
 
-            // --- Dashboard Functions ---
+            /**
+             * Logs the user out and resets the app to the login screen.
+             */
+            const logout = () => {
+                currentUser = null;
+                
+                appContainer.classList.add('hidden');
+                loginView.classList.remove('hidden');
+                
+                userInfo.classList.add('hidden');
+                
+                switchView('consumer'); // Default to consumer view on logout
+                renderAllDashboards(); 
+            };
 
+            /**
+             * Switches the visible dashboard based on the user's role.
+             * @param {string} role - The user's role (e.g., 'farmer', 'consumer').
+             */
             const switchView = (role) => {
                 Object.values(dashboards).forEach(d => d.classList.add('hidden'));
-                if (dashboards[role]) {
+                
+                if (currentUser && dashboards[role]) {
                     dashboards[role].classList.remove('hidden');
+                } else {
+                    // Default to consumer dashboard if role is invalid or user is logged out
+                    dashboards.consumer.classList.remove('hidden');
                 }
             };
             
+            /**
+             * Renders all product lists and dashboard stats, filtering by search term.
+             * @param {string} [searchTerm=''] - The text to filter products by.
+             */
             const renderAllDashboards = (searchTerm = '') => {
-                 if (!currentUser) return; 
-
                  const lowerCaseSearchTerm = searchTerm.toLowerCase();
-                 const allFilteredBatches = productBatches.filter(p => 
-                      p.name.toLowerCase().includes(lowerCaseSearchTerm) || 
-                      p.id.toLowerCase().includes(lowerCaseSearchTerm)
+                 const filteredBatches = productBatches.filter(p => 
+                     p.name.toLowerCase().includes(lowerCaseSearchTerm) || 
+                     p.id.toLowerCase().includes(lowerCaseSearchTerm)
                  );
-
-                // Filter logic based on role
-                if (currentUser.role === 'farmer') {
-                    const farmerProducts = allFilteredBatches.filter(p => p.farmerId === currentUser.id);
-                    renderProductList('farmer', farmerProducts);
-                }
-                
-                if (currentUser.role === 'processor') {
-                    const processorProducts = allFilteredBatches.filter(p => p.status === 'processed' || p.status === 'in-transit' || p.status === 'harvested'); 
-                    renderProductList('processor', processorProducts);
-                }
                  
-                if (currentUser.role === 'retailer') {
-                     const retailerProducts = allFilteredBatches.filter(p => p.status === 'at-retailer' || p.status === 'sold' || p.status === 'in-transit');
-                     renderProductList('retailer', retailerProducts);
-                }
+                // Consumer always sees all filtered batches
+                renderProductList('consumer', filteredBatches);
                 
-                if (currentUser.role === 'consumer') {
-                    renderProductList('consumer', allFilteredBatches);
+                if (currentUser) {
+                    const userName = currentUser.name;
+                    let farmerProducts, distributorProducts, retailerProducts;
+                    
+                    switch(currentUser.role) {
+                        case 'farmer':
+                            // Farmer sees batches they created
+                            farmerProducts = filteredBatches.filter(p => p.history[0] && p.history[0].by.includes(userName));
+                            renderProductList('farmer', farmerProducts);
+                            updateFarmerStats(farmerProducts);
+                            break;
+                        case 'distributor':
+                            // Distributor sees batches they have interacted with
+                            distributorProducts = filteredBatches.filter(p => p.history.some(h => h.by.includes(userName)));
+                            renderProductList('distributor', distributorProducts);
+                            updateDistributorStats(distributorProducts);
+                            break;
+                        case 'retailer':
+                            // Retailer sees batches they have interacted with
+                            retailerProducts = filteredBatches.filter(p => p.history.some(h => h.by.includes(userName)));
+                            renderProductList('retailer', retailerProducts);
+                            updateRetailerStats(retailerProducts);
+                            break;
+                    }
+                } else {
+                     // Clear role-specific dashboards if logged out
+                     renderProductList('farmer', []);
+                     renderProductList('distributor', []);
+                     renderProductList('retailer', []);
+                     updateFarmerStats([]);
+                     updateDistributorStats([]);
+                     updateRetailerStats([]);
                 }
             };
 
+            /**
+             * Renders the product cards for a specific role's dashboard.
+             * @param {string} role - The dashboard role (e.g., 'farmer').
+             * @param {Array<object>} products - The array of product objects to render.
+             */
             const renderProductList = (role, products) => {
                 const listEl = productLists[role];
                 if (!listEl) return;
-                listEl.innerHTML = '';
+                listEl.innerHTML = ''; // Clear existing list
 
                 if (products.length === 0) {
                     listEl.innerHTML = '<p>No batches found.</p>';
                     return;
                 }
-
+                
                 products.forEach(product => {
                     const card = document.createElement('div');
                     card.className = 'product-card';
@@ -1319,57 +1789,66 @@
                         <p><strong>Quantity:</strong> ${product.quantity} kg</p>
                         <p><strong>Batch ID:</strong> ${product.id}</p>
                         <p><strong>Last Update:</strong> ${new Date(product.history[product.history.length-1].timestamp).toLocaleString()}</p>
-                        
-                        <!-- QR CODE CONTAINER FOR THE CARD -->
-                        <div class="card-qr-container">
-                            <canvas id="qr-${product.id}"></canvas>
-                        </div>
-                        
                         <div class="product-actions">
                             ${getActionsForRole(role, product)}
                         </div>
                     `;
                     listEl.appendChild(card);
-
-                    // Generate QR code for the card
-                    const trackUrl = `${window.location.href.split('#')[0]}#product=${product.id}`;
-                    const qrCanvas = document.getElementById(`qr-${product.id}`);
-                    if (qrCanvas) {
-                        new QRious({
-                            element: qrCanvas,
-                            value: trackUrl,
-                            size: 100, 
-                            padding: 5,
-                            background: 'white',
-                            foreground: 'black'
-                        });
-                    }
+                });
+                
+                const cards = listEl.querySelectorAll('.product-card');
+                cards.forEach((card, index) => {
+                    card.style.animationDelay = `${index * 100}ms`; 
                 });
             };
 
+            // --- Dashboard Stat Update Functions ---
+            const updateFarmerStats = (products) => {
+                document.getElementById('farmer-stat-total').textContent = products.length;
+                document.getElementById('farmer-stat-harvested').textContent = products.filter(p => p.status === 'harvested').length;
+                document.getElementById('farmer-stat-transit').textContent = products.filter(p => p.status === 'in-transit').length;
+            };
+            
+            const updateDistributorStats = (products) => {
+                document.getElementById('dist-stat-total').textContent = products.length;
+                document.getElementById('dist-stat-processed').textContent = products.filter(p => p.status === 'processed').length;
+                document.getElementById('dist-stat-transit').textContent = products.filter(p => p.status === 'in-transit').length;
+            };
+            
+            const updateRetailerStats = (products) => {
+                document.getElementById('retail-stat-total').textContent = products.length;
+                document.getElementById('retail-stat-instore').textContent = products.filter(p => p.status === 'at-retailer').length;
+                document.getElementById('retail-stat-sold').textContent = products.filter(p => p.status === 'sold').length;
+            };
+
+            /**
+             * Generates the HTML for action buttons based on user role and product status.
+             * @param {string} role - The dashboard role.
+             * @param {object} product - The product batch object.
+             * @returns {string} HTML string for the buttons.
+             */
             const getActionsForRole = (role, product) => {
-                // All roles can view the journey
+                // "View Journey" is available to everyone
                 let actions = `<button class="scan-btn" data-id="${product.id}">View Journey</button>`;
                 
+                // Only show role-specific actions if the current user matches the dashboard role
                 if (!currentUser || currentUser.role !== role) return actions;
 
-                // Role-specific actions
                 switch(role) {
                     case 'farmer':
-                        // Only the farmer who owns it can send it
-                        if (product.status === 'harvested' && product.farmerId === currentUser.id) {
+                        if (product.status === 'harvested') {
                             actions += `<button data-action="process" data-id="${product.id}">Send to Processor</button>`;
                         }
                         break;
-                    case 'processor':
-                        if (product.status === 'harvested') { 
+                    case 'distributor': 
+                        if (product.status === 'harvested') {
                              actions += `<button data-action="process" data-id="${product.id}">Process Batch</button>`;
                         }
                         if (product.status === 'processed') {
                              actions += `<button data-action="ship" data-id="${product.id}">Ship to Retailer</button>`;
                         }
                         break;
-                    case 'retailer':
+                    case 'retailer': 
                         if (product.status === 'in-transit') {
                             actions += `<button data-action="receive_retailer" data-id="${product.id}">Receive at Store</button>`;
                         }
@@ -1381,16 +1860,21 @@
                 return actions;
             };
 
+            /**
+             * Handles clicks on product card action buttons (e.g., 'View Journey', 'Process Batch').
+             */
             const handleProductAction = (e) => {
                 const target = e.target;
                 const action = target.dataset.action;
                 const id = target.dataset.id;
 
+                // Handle "View Journey" click
                 if (target.classList.contains('scan-btn')) {
                     showTrackingModal(id);
                     return;
                 }
 
+                // Handle other actions
                 if (!action || !id || !currentUser) return;
                 
                 const product = productBatches.find(p => p.id === id);
@@ -1401,332 +1885,568 @@
                     by: `${currentUser.name} (${currentUser.role})`, 
                     timestamp: new Date().toISOString() 
                 };
+                
+                // Use more specific roles for history entries
+                if(currentUser.role === 'distributor') {
+                    newHistoryEntry.by = `${currentUser.name} (Processor)`;
+                } else if (currentUser.role === 'retailer') {
+                     newHistoryEntry.by = `${currentUser.name} (Retailer)`;
+                }
 
-                // Logic for state transitions
-                if (action === 'process' && (product.status === 'harvested') && (currentUser.role === 'farmer' || currentUser.role === 'processor')) {
-                    newStatus = 'processed';
-                    newHistoryEntry.status = 'Processed';
-                    newHistoryEntry.location = LOCATIONS.PUNE_HUB; 
-                    product.status = newStatus;
-                    product.history.push(newHistoryEntry);
-                } else if (action === 'ship' && product.status === 'processed' && currentUser.role === 'processor') {
-                    newStatus = 'in-transit';
-                    newHistoryEntry.status = 'Shipped by Processor';
-                    newHistoryEntry.location = product.history[product.history.length - 1].location; 
-                    product.status = newStatus;
-                    product.history.push(newHistoryEntry);
-                    if (!product.destination) {
-                        product.destination = LOCATIONS.BANGALORE_RETAIL; 
+                // Mock locations for demo
+                const processorLoc = { lat: 18.5204, lng: 73.8567 }; // Pune
+                const retailerLoc = { lat: 12.9716, lng: 77.5946 }; // Bangalore
+
+                // State machine logic for updating product status
+                if (action === 'process' && product.status === 'harvested' && (currentUser.role === 'farmer' || currentUser.rowle === 'distributor')) {
+                    if(currentUser.role === 'farmer') {
+                        newStatus = 'in-transit';
+                        newHistoryEntry.status = 'In Transit (to Processor)';
+                        newHistoryEntry.location = product.history[0].location; // Use original farm location
+                    } else if (currentUser.role === 'distributor') {
+                         newStatus = 'processed';
+                         newHistoryEntry.status = 'Processed';
+                         newHistoryEntry.location = processorLoc;
                     }
+
+                } else if (action === 'ship' && product.status === 'processed' && currentUser.role === 'distributor') {
+                     newStatus = 'in-transit';
+                     newHistoryEntry.status = 'In Transit (to Retailer)';
+                     newHistoryEntry.location = processorLoc;
                 } else if (action === 'receive_retailer' && product.status === 'in-transit' && currentUser.role === 'retailer') {
                     newStatus = 'at-retailer';
-                    newHistoryEntry.status = 'Received by Retailer';
-                    newHistoryEntry.location = product.destination || LOCATIONS.BANGALORE_RETAIL; 
-                    product.status = newStatus;
-                    product.history.push(newHistoryEntry);
-                    delete product.destination; 
+                    newHistoryEntry.status = 'Received at Retailer';
+                    newHistoryEntry.location = retailerLoc;
                 } else if (action === 'sell' && product.status === 'at-retailer' && currentUser.role === 'retailer') {
                     newStatus = 'sold';
                     newHistoryEntry.status = 'Sold';
-                    newHistoryEntry.location = product.history[product.history.length - 1].location; 
+                    newHistoryEntry.location = retailerLoc;
+                } else {
+                    showCustomAlert(`Invalid action or status for current user role: ${currentUser.role}`);
+                    return;
+                }
+
+                // If a valid action was taken, update the product and re-render
+                if(newStatus) {
                     product.status = newStatus;
                     product.history.push(newHistoryEntry);
+                    renderAllDashboards(searchInput.value); // Re-render to reflect changes
+                    showCustomAlert(`Product Batch ${id} updated to: ${newStatus.toUpperCase()}`);
                 }
-
-                renderAllDashboards(searchInput.value);
             };
             
-            const handleAddProduct = (e) => {
-                e.preventDefault();
-                if (!currentUser || currentUser.role !== 'farmer') {
-                    return; 
-                }
-                
-                const name = document.getElementById('product-name').value;
-                const quantity = document.getElementById('product-quantity').value;
-                const harvestDate = document.getElementById('harvest-date').value;
-                
-                const newBatch = {
-                    id: `batch-${new Date().getTime()}`,
-                    farmerId: currentUser.id, // Link to current farmer
-                    name: name,
-                    quantity: quantity,
-                    status: 'harvested',
-                    history: [
-                        {
-                            status: 'Harvested',
-                            by: `${currentUser.name} (${currentUser.role})`,
-                            timestamp: new Date(harvestDate).toISOString(),
-                            location: LOCATIONS.MUMBAI_FARM 
-                        }
-                    ]
-                };
-                
-                productBatches.unshift(newBatch); 
-                renderAllDashboards();
-                addProductForm.reset();
-            };
+            // --- Helper/Utility Functions ---
             
-            // --- MODAL & MAP FUNCTIONS ---
-            
-            const showTrackingModal = (productId) => {
-                const product = productBatches.find(p => p.id === productId);
+            /**
+             * Shows the tracking modal with details for a specific product.
+             * @param {string} id - The product batch ID.
+             */
+            const showTrackingModal = (id) => {
+                const product = productBatches.find(p => p.id === id);
                 if (!product) return;
-                
-                modalTitle.textContent = `Journey of ${product.name}`;
-                
-                trackingTimeline.innerHTML = '';
-                modalQrCodeContainer.innerHTML = '';
-                
-                // Clear any existing map layers and intervals
-                clearMapLayers();
-                
-                // Ensure map is initialized and the size is correct for the modal
-                initMap();
-                map.invalidateSize();
 
+                document.getElementById('modal-title').textContent = `${product.name} (Batch ID: ${product.id})`;
+                renderTimeline(product.history);
+                renderMap(product.history);
+                generateQRCode(product.id);
 
-                // 1. Render Timeline
-                product.history.forEach(item => {
+                trackingModal.classList.add('visible');
+            };
+
+            /**
+             * Renders the vertical timeline in the tracking modal.
+             * @param {Array<object>} history - The product's history array.
+             */
+            const renderTimeline = (history) => {
+                const timelineEl = document.getElementById('tracking-timeline');
+                timelineEl.innerHTML = '';
+
+                // Sort history from newest to oldest for display
+                const sortedHistory = [...history].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); 
+
+                sortedHistory.forEach(item => {
                     const li = document.createElement('li');
                     li.className = 'timeline-item';
                     li.innerHTML = `
                         <p>${item.status}</p>
-                        <span>by ${item.by} at ${item.location.name}</span>
-                        <span>${new Date(item.timestamp).toLocaleString()}</span>
+                        <span>${item.by} on ${new Date(item.timestamp).toLocaleString()}</span>
                     `;
-                    trackingTimeline.appendChild(li);
+                    timelineEl.appendChild(li);
+                });
+            };
+
+            /**
+             * Renders the Leaflet map in the tracking modal.
+             * @param {Array<object>} history - The product's history array.
+             */
+            const renderMap = (history) => {
+                // Remove previous map instance if it exists
+                if(map) {
+                    map.remove();
+                }
+                
+                const coordinates = history
+                    .filter(item => item.location) // Only get items with location data
+                    .map(item => [item.location.lat, item.location.lng]);
+
+                if (coordinates.length === 0) {
+                    document.getElementById('map').innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No location data available.</p>';
+                    return;
+                }
+
+                // Set map center to the last known location
+                const center = coordinates[coordinates.length - 1]; 
+                map = L.map('map').setView(center, 10);
+
+                // Add OpenStreetMap tile layer
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+
+                // Add markers for each location in history
+                history.filter(item => item.location).forEach(item => {
+                     L.marker([item.location.lat, item.location.lng]).addTo(map)
+                        .bindPopup(`<b>${item.status}</b><br>By: ${item.by}`);
                 });
 
-                // 2. Generate QR Code (as requested)
-                const trackUrl = `${window.location.href.split('#')[0]}#product=${product.id}`;
-                const qrCanvasContainer = document.getElementById('modal-qr-code');
-                
-                const tempCanvas = document.createElement('canvas');
-                qrCanvasContainer.appendChild(tempCanvas);
+                // Draw a line connecting the points
+                polyline = L.polyline(coordinates, {color: 'var(--accent-primary)'}).addTo(map);
 
+                // Zoom the map to fit the path
+                if (coordinates.length > 1) {
+                    map.fitBounds(polyline.getBounds());
+                } else if (coordinates.length === 1) {
+                    map.setZoom(13); 
+                }
+            };
+
+            /**
+             * Generates a QR code in the tracking modal.
+             * @param {string} data - The data to encode (product ID).
+             */
+            const generateQRCode = (data) => {
+                const qrContainer = document.getElementById('modal-qr-code');
+                qrContainer.innerHTML = ''; // Clear previous QR
+                const canvas = document.createElement('canvas');
+                canvas.id = 'qr-canvas';
+                qrContainer.appendChild(canvas);
+                
                 new QRious({
-                    element: tempCanvas,
-                    value: trackUrl,
-                    size: 160,
-                    padding: 10,
-                    background: 'white',
-                    foreground: 'black'
-                });
-
-                // 3. Render Historical Map Route
-                const latlngs = product.history.map(item => [item.location.lat, item.location.lng]);
-                
-                if (latlngs.length > 0) {
-                     // Draw the path
-                     historicalPolyline = L.polyline(latlngs, { color: 'var(--accent-secondary)', weight: 4, opacity: 0.8 }).addTo(map);
-                    
-                    // Place markers for historical steps
-                    product.history.forEach((item, index) => {
-                         const marker = L.marker([item.location.lat, item.location.lng], {
-                             title: `${item.status} at ${item.location.name}`
-                         })
-                         .addTo(map)
-                         .bindPopup(`<b>${index + 1}. ${item.status}</b><br>${item.location.name}`);
-                         historicalMarkers.push(marker);
-                    });
-                     
-                     // Fit map view to cover all historical points
-                     map.fitBounds(historicalPolyline.getBounds().pad(0.2)); 
-                } else {
-                    // Fallback view if no history
-                    map.setView([20.5937, 78.9629], 5); 
-                }
-
-                // 4. Implement Live Tracking (if in-transit)
-                if (product.status === 'in-transit' && product.destination && latlngs.length > 0) {
-                    const fromLoc = product.history[product.history.length - 1].location;
-                    const toLoc = product.destination;
-                    
-                    // Mark the final destination
-                    L.marker([toLoc.lat, toLoc.lng])
-                        .addTo(map)
-                        .bindPopup(`<b>Destination</b><br>${toLoc.name}`);
-                    
-                    let progress = 0;
-                    const totalSteps = 200; // Determines simulation smoothness/duration
-                    
-                    // Start the simulated movement
-                    liveTrackingInterval = setInterval(() => {
-                        progress++;
-                        // Interpolate latitude and longitude for smooth movement
-                        const lat = fromLoc.lat + (toLoc.lat - fromLoc.lat) * (progress / totalSteps);
-                        const lng = fromLoc.lng + (toLoc.lng - fromLoc.lng) * (progress / totalSteps);
-                        
-                        const currentLatLng = [lat, lng];
-
-                        if (!liveMarker) {
-                            // Create the truck marker
-                            liveMarker = L.marker(currentLatLng, { icon: truckIcon }).addTo(map);
-                            liveMarker.bindPopup("<b>🚚 In Transit!</b><br>Estimated arrival soon.").openPopup();
-                        } else {
-                            // Move the existing marker
-                            liveMarker.setLatLng(currentLatLng);
-                        }
-                        
-                        // Keep the map centered on the moving marker
-                        map.panTo(currentLatLng);
-
-                        if (progress >= totalSteps) {
-                            clearInterval(liveTrackingInterval);
-                            liveTrackingInterval = null;
-                            product.status = 'at-retailer'; // Auto-update status when simulation ends
-                            product.history.push({
-                                status: 'Received by Retailer (Simulated)',
-                                by: `System`,
-                                timestamp: new Date().toISOString(),
-                                location: toLoc 
-                            });
-                            liveMarker.bindPopup("<b>Arrived at Destination!</b>").openPopup();
-                            renderAllDashboards(searchInput.value); // Refresh dashboard to show new status
-                        }
-                    }, 50); // 50ms refresh rate for smooth animation
-                }
-                
-                // Show the modal
-                trackingModal.classList.add('visible');
-            };
-
-            const closeTrackingModal = () => {
-                trackingModal.classList.remove('visible');
-                clearMapLayers(); // Clear map and interval when closing
-                try {
-                    window.location.hash = '';
-                } catch (e) {
-                    console.warn("Could not clear URL hash:", e);
-                }
-            };
-            
-            // --- Help Desk Functions ---
-            
-            const showHelpModal = () => {
-                helpModal.classList.add('visible');
-                sideMenu.classList.remove('open'); // Close side menu when opening modal
-            };
-
-            const closeHelpModal = () => {
-                helpModal.classList.remove('visible');
-            };
-
-            // --- NEW Info Modal Functions ---
-            
-            const renderUserDirectory = () => {
-                userDirectoryList.innerHTML = ''; // Clear existing content
-                
-                MOCK_USERS.forEach(user => {
-                    const userCard = document.createElement('div');
-                    userCard.className = 'user-card-directory';
-                    userCard.style.cssText = 'padding: 1.2rem; border: 1px solid #eee; border-radius: 12px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.03);';
-                    
-                    const roleColor = {
-                        farmer: 'var(--accent-primary)',
-                        processor: '#8e44ad',
-                        retailer: '#d35400',
-                        consumer: '#2980b9'
-                    }[user.role] || 'gray';
-                    
-                    userCard.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
-                            <h5 style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary);">${user.name}</h5>
-                            <span style="padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; font-weight: 600; text-transform: capitalize; background: ${roleColor}22; color: ${roleColor};">
-                                ${user.role}
-                            </span>
-                        </div>
-                        <p style="margin-bottom: 0.5rem;">
-                            <strong style="color: var(--text-secondary);">Email:</strong> 
-                            <a href="mailto:${user.email}" style="color: #3498db; text-decoration: none;">${user.email}</a>
-                        </p>
-                        <p>
-                            <strong style="color: var(--text-secondary);">Contact:</strong> 
-                            <a href="tel:${user.contact}" style="color: #3498db; text-decoration: none;">${user.contact}</a>
-                        </p>
-                    `;
-                    userDirectoryList.appendChild(userCard);
+                    element: canvas,
+                    value: data,
+                    size: 150,
+                    level: 'H' // High error correction
                 });
             };
             
-            const showInfoModal = () => {
-                renderUserDirectory();
-                infoModal.classList.add('visible');
-                sideMenu.classList.remove('open');
-            };
-
-            const closeInfoModal = () => {
-                infoModal.classList.remove('visible');
-            };
-
-            // --- URL Hash Tracking ---
-
-            const checkUrlHash = () => {
-                const hash = window.location.hash;
-                if (hash && hash.startsWith('#product=')) {
-                    const productId = hash.substring(9); 
-                    if (productId) {
-                        setTimeout(() => {
-                           showTrackingModal(productId);
-                        }, 100);
-                    }
-                }
-            };
-            
-            // --- EVENT LISTENERS ---
+            /**
+             * Binds all initial event listeners for the main application.
+             */
             const bindEventListeners = () => {
+                // Menu navigation
                 openMenuBtn.addEventListener('click', () => sideMenu.classList.add('open'));
                 closeMenuBtn.addEventListener('click', () => sideMenu.classList.remove('open'));
                 
-                // Auth listeners
-                loginForm.addEventListener('submit', handleLogin);
-                registerForm.addEventListener('submit', handleRegister);
-                logoutBtn.addEventListener('click', handleLogout);
-                
-                // Page navigation listeners
-                goToRegisterLink.addEventListener('click', () => showPage('register'));
-                goToLoginLink.addEventListener('click', () => showPage('login'));
-                sideMenuLoginBtn.addEventListener('click', () => {
-                    showPage('login');
-                    sideMenu.classList.remove('open');
-                });
-                sideMenuRegisterBtn.addEventListener('click', () => {
-                    showPage('register');
-                    sideMenu.classList.remove('open');
-                });
-
-                // Dashboard listeners
-                addProductForm.addEventListener('submit', handleAddProduct);
-                
-                // Modal listeners
-                closeModalBtn.addEventListener('click', closeTrackingModal);
-                
-                // Help Desk listeners
-                openHelpModalBtn.addEventListener('click', showHelpModal);
-                closeHelpModalBtn.addEventListener('click', closeHelpModal);
-
-                // NEW Info Modal listeners
-                openInfoModalBtn.addEventListener('click', showInfoModal);
-                closeInfoModalBtn.addEventListener('click', closeInfoModal);
-                
-                document.body.addEventListener('click', (e) => {
-                    if (e.target.dataset.id && (e.target.dataset.action || e.target.classList.contains('scan-btn'))) {
-                        handleProductAction(e);
+                // Modal close events
+                trackingModal.addEventListener('click', (e) => {
+                    if (e.target === trackingModal) { // Click on overlay
+                        trackingModal.classList.remove('visible');
                     }
                 });
-                
-                window.addEventListener('hashchange', checkUrlHash);
+                closeModalBtn.addEventListener('click', () => {
+                     trackingModal.classList.remove('visible');
+                });
 
+                // Login/Register form toggling
+                showRegisterLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    loginFormElement.classList.add('hidden');
+                    registerFormElement.classList.remove('hidden');
+                });
+                showLoginLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    registerFormElement.classList.add('hidden');
+                    loginFormElement.classList.remove('hidden');
+                });
+                
+                // Form submissions
+                loginFormElement.addEventListener('submit', handleLogin);
+                registerFormElement.addEventListener('submit', handleRegister);
+                
+                logoutBtn.addEventListener('click', logout);
+                
+                // Farmer's "Add Product" form
+                addProductForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    if (!currentUser || currentUser.role !== 'farmer') {
+                        showCustomAlert("Only farmers can add new batches.");
+                        return;
+                    }
+                    
+                    const name = document.getElementById('product-name').value;
+                    const quantity = document.getElementById('product-quantity').value;
+                    const harvestDate = document.getElementById('harvest-date').value;
+
+                    // Create new batch and add to mock DB
+                    const newBatch = {
+                        id: `batch-${Date.now()}`,
+                        name: name,
+                        quantity: parseFloat(quantity),
+                        status: 'harvested',
+                        history: [
+                            { 
+                                status: 'Harvested', 
+                                by: `${currentUser.name} (Farmer)`, 
+                                timestamp: new Date(harvestDate).toISOString(),
+                                location: { lat: 19.0760, lng: 72.8777 } // Mock farm location
+                            }
+                        ]
+                    };
+                    productBatches.push(newBatch);
+                    e.target.reset();
+                    renderAllDashboards(); // Re-render to show new batch
+                    showCustomAlert(`New Batch '${name}' added with ID: ${newBatch.id}`);
+                });
+
+                // Event delegation for all product lists
+                document.querySelectorAll('.product-list').forEach(list => {
+                    list.addEventListener('click', handleProductAction);
+                });
+
+                // Search bar input
                 searchInput.addEventListener('input', (e) => {
                     renderAllDashboards(e.target.value);
                 });
+                
+                // Set current year in footer
+                document.getElementById('currentYear').textContent = new Date().getFullYear();
+            
+                // --- NEW EVENT LISTENERS ---
+                
+                // Custom Alert Close Button
+                customAlertCloseBtn.addEventListener('click', hideCustomAlert);
+                customAlertModal.addEventListener('click', (e) => {
+                    if (e.target === customAlertModal) {
+                        hideCustomAlert();
+                    }
+                });
+                
+                // Password Reset Flow Listeners
+                const showLoginForm = () => {
+                    loginFormElement.classList.remove('hidden');
+                    registerFormElement.classList.add('hidden');
+                    forgotPasswordForm.classList.add('hidden');
+                    otpForm.classList.add('hidden');
+                    resetPasswordForm.classList.add('hidden');
+                };
+                
+                showForgotPasswordLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    loginFormElement.classList.add('hidden');
+                    registerFormElement.classList.add('hidden');
+                    forgotPasswordForm.classList.remove('hidden');
+                });
+                
+                forgotShowLoginLink.addEventListener('click', (e) => { e.preventDefault(); showLoginForm(); });
+                otpShowLoginLink.addEventListener('click', (e) => { e.preventDefault(); showLoginForm(); });
+                resetShowLoginLink.addEventListener('click', (e) => { e.preventDefault(); showLoginForm(); });
+
+                forgotPasswordForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const emailOrPhone = document.getElementById('forgot-email-phone').value;
+                    const user = MOCK_USERS_DB.find(u => u.email === emailOrPhone || u.contact === emailOrPhone);
+                    
+                    if (user) {
+                        tempUserForPasswordReset = user;
+                        
+                        generatedOTP = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit OTP
+                        
+                        // Simulate sending OTP. In a real app, this is where you'd call your backend.
+                        // THIS IS WHERE YOU WOULD CALL YOUR BACKEND TO SEND THE SMS VIA TWILIO.
+                        console.log(`******************************`);
+                        console.log(`* SIMULATING TWILIO SMS: Sending OTP ${generatedOTP} to ${user.contact} *`);
+                        console.log(`******************************`);
+
+                        forgotPasswordForm.classList.add('hidden');
+                        otpForm.classList.remove('hidden');
+                        
+                        showCustomAlert(`An OTP has been sent to your registered email and phone number via SMS (simulated). (For this demo, please check the browser console for the OTP).`);
+                    } else {
+                        showCustomAlert('No account found with that email or phone number.');
+                    }
+                });
+                
+                otpForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const otp = document.getElementById('otp-input').value;
+                    if (otp === generatedOTP && generatedOTP !== null) { // Check against the stored generated OTP
+                        otpForm.classList.add('hidden');
+                        resetPasswordForm.classList.remove('hidden');
+                        generatedOTP = null; // Clear the OTP after use
+                    } else {
+                        showCustomAlert('Invalid OTP. Please try again.');
+                    }
+                });
+                
+                resetPasswordForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const newPassword = document.getElementById('new-password').value;
+                    const confirmPassword = document.getElementById('confirm-password').value;
+                    const newPasswordInputEl = document.getElementById('new-password');
+                    
+                    if (newPassword !== confirmPassword) {
+                        showCustomAlert('Passwords do not match.');
+                        return;
+                    }
+                    
+                    // --- NEW: Password Validation ---
+                    if (!isValidPassword(newPassword)) {
+                        showCustomAlert('Password is not strong enough. It must be at least 8 characters and include letters, numbers, and symbols (e.g., !@#$).');
+                        newPasswordInputEl.closest('.form-group').classList.add('invalid');
+                        return;
+                    }
+                    newPasswordInputEl.closest('.form-group').classList.remove('invalid');
+                    // --- END NEW ---
+                    
+                    if (tempUserForPasswordReset) {
+                        // Find the user in the mock DB and update their password
+                        const userInDb = MOCK_USERS_DB.find(u => u.id === tempUserForPasswordReset.id);
+                        if (userInDb) {
+                            userInDb.password = newPassword;
+                        }
+                        
+                        tempUserForPasswordReset = null;
+                        resetPasswordForm.reset();
+                        otpForm.reset();
+                        forgotPasswordForm.reset();
+                        
+                        showLoginForm();
+                        showCustomAlert('Password reset successful! You can now log in with your new password.');
+                    } else {
+                        showCustomAlert('An error occurred. Please try again.');
+                        showLoginForm();
+                    }
+                });
+                
+                // --- NEW: Password Field Listeners ---
+                const registerPasswordInput = document.getElementById('register-password');
+                const newPasswordInput = document.getElementById('new-password');
+                
+                const setupPasswordListener = (inputEl) => {
+                    if (!inputEl) return;
+                    const rulesEl = inputEl.nextElementSibling; // Get the <p> tag
+                    if (rulesEl && rulesEl.classList.contains('password-rules')) {
+                        inputEl.addEventListener('focus', () => {
+                            rulesEl.classList.remove('hidden');
+                        });
+                        inputEl.addEventListener('blur', () => {
+                            rulesEl.classList.add('hidden');
+                        });
+                        inputEl.addEventListener('input', () => {
+                            // Remove invalid state on typing
+                            inputEl.closest('.form-group').classList.remove('invalid');
+                        });
+                    }
+                };
+                
+                setupPasswordListener(registerPasswordInput);
+                setupPasswordListener(newPasswordInput);
+                
+                // Also add input listener for confirm password
+                const confirmPasswordInput = document.getElementById('confirm-password');
+                if (confirmPasswordInput) {
+                    confirmPasswordInput.addEventListener('input', () => {
+                         confirmPasswordInput.closest('.form-group').classList.remove('invalid');
+                    });
+                }
+                // --- END NEW ---
+            
             };
 
-            // --- INITIALIZE APP ---
-            init();
+            
+            // --- DYNAMIC CHATBOT LOGIC ---
+            
+            // Chatbot DOM Elements
+            const chatToggleBtn = document.getElementById('chat-toggle-btn');
+            const chatWindow = document.getElementById('chat-window');
+            const closeChatBtn = document.getElementById('close-chat-btn');
+            const chatMessages = document.getElementById('chat-messages');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            
+            // !! API KEY INTEGRATED AS REQUESTED !!
+            // This is the key you provided. 
+            // !! DANGER: Delete this key from your Google Console immediately.
+            const GEMINI_API_KEY = 'AIzaSyD4YGpH1dmrKm81PG117zGjh2mGArZ4uGU'; 
+            
+            // Updated the URL to the correct model endpoint.
+            const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
 
+            /**
+             * Toggles the visibility of the chat window.
+             */
+            const toggleChatWindow = () => {
+                chatWindow.classList.toggle('hidden');
+            };
+
+            /**
+             * Adds a message to the chat UI.
+             * @param {string} message - The text of the message.
+             * @param {string} sender - 'user' or 'bot'.
+             * @returns {HTMLElement} The created message element.
+             */
+            const addChatMessage = (message, sender) => {
+                const messageEl = document.createElement('div');
+                messageEl.className = `chat-message ${sender}`;
+                messageEl.textContent = message;
+                
+                chatMessages.appendChild(messageEl);
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
+                return messageEl;
+            };
+            
+            /**
+             * Shows the animated "..." typing indicator.
+             */
+            const showTypingIndicator = () => {
+                const indicatorEl = document.createElement('div');
+                indicatorEl.className = 'chat-message bot'; // Styled as a bot message
+                indicatorEl.id = 'typing-indicator';
+                indicatorEl.innerHTML = `
+                    <div class="typing-indicator">
+                        <span></span><span></span><span></span>
+                    </div>
+                `;
+                chatMessages.appendChild(indicatorEl);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            };
+            
+            /**
+             * Removes the typing indicator.
+             */
+            const hideTypingIndicator = () => {
+                 const typingEl = document.getElementById('typing-indicator');
+                 if(typingEl) typingEl.remove();
+            };
+
+            /**
+             * Handles the chat form submission, sending the user input to the AI.
+             */
+            const handleChatSubmit = async (e) => {
+                e.preventDefault();
+                const userInput = chatInput.value.trim();
+                if (!userInput) return;
+
+                // 1. Add user's message to UI
+                addChatMessage(userInput, 'user');
+                chatInput.value = '';
+                showTypingIndicator();
+
+                try {
+                    // 2. Get AI response
+                    const botResponse = await getAIResponse(userInput);
+                    
+                    // 3. Remove loading and add bot response
+                    hideTypingIndicator();
+                    addChatMessage(botResponse, 'bot');
+
+                } catch (error) {
+                    console.error('Error fetching AI response:', error);
+                    hideTypingIndicator();
+                    addChatMessage('Sorry, I am having trouble connecting. (This may be due to an invalid API key). Please try again.', 'bot');
+                }
+            };
+
+            /**
+             * Fetches a response from the Gemini AI API.
+             * @param {string} userInput - The user's question.
+             * @returns {Promise<string>} The AI's text response.
+             */
+            const getAIResponse = async (userInput) => {
+                // Create a prompt that gives the AI "context" about our app's data.
+                const systemPrompt = `
+                    You are a helpful assistant for a Food Supply Chain Management platform.
+                    Your job is to answer the user's questions based *only* on the data provided below.
+                    Be friendly, concise, and helpful. If you don't know the answer, say so.
+                    
+                    Here is the current application data:
+                    
+                    1. The currently logged-in user:
+                    ${JSON.stringify(currentUser, null, 2)}
+                    
+                    2. All product batches in the system:
+                    ${JSON.stringify(productBatches, null, 2)}
+                    
+                    Now, please answer the user's question.
+                    User's Question: "${userInput}"
+                `;
+
+                const requestBody = {
+                    contents: [{
+                        parts: [{
+                            text: systemPrompt
+                        }]
+                    }],
+                    // Add safety settings to reduce refusal for this simple task
+                    safetySettings: [
+                        { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE" },
+                        { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE" },
+                        { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE" },
+                        { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE" }
+                    ]
+                };
+
+                const response = await fetch(GEMINI_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Parse the specific response from the Gemini API
+                if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                     return data.candidates[0].content.parts[0].text;
+                } else if (data.candidates && data.candidates[0].finishReason === 'SAFETY') {
+                    // Handle cases where the prompt is blocked for safety
+                    return "I'm sorry, I can't respond to that query due to safety settings.";
+                } else {
+                    // Generic fallback
+                    return "I'm not sure how to respond to that.";
+                }
+            };
+            
+            // --- Event Listener for Suggestion Chips ---
+            // Uses event delegation on the chat messages container
+            document.getElementById('chat-messages').addEventListener('click', (e) => {
+                if(e.target.classList.contains('chat-suggestion-chip')) {
+                    const suggestion = e.target.textContent;
+                    chatInput.value = suggestion;
+                    // Create and dispatch a submit event on the form
+                    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                    chatForm.dispatchEvent(submitEvent);
+                }
+            });
+            
+            // --- END CHATBOT LOGIC ---
+
+
+            // --- Main App Initialization ---
+            initApp();
+            
+            // --- Chatbot Initialization ---
+            chatToggleBtn.addEventListener('click', toggleChatWindow);
+            closeChatBtn.addEventListener('click', toggleChatWindow);
+            chatForm.addEventListener('submit', handleChatSubmit);
         });
     </script>
+    
 </body>
 </html>
