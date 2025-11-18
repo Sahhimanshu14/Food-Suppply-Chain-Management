@@ -1210,7 +1210,7 @@
                         <select id="register-role" required>
                             <option value="consumer">Consumer</option>
                             <option value="farmer">Farmer</option>
-                            <option value="distributor">Distributor</option>
+                            <option value="processor">Processor</option>
                             <option value="retailer">Retailer</option>
                         </select>
                     </div>
@@ -1334,7 +1334,7 @@
                 <section class="hero-section">
                     <div class="hero-content">
                         <h1>Trace Your Food Journey</h1>
-                        <p>Farm → Processor → Distributor → Retailer → You</p>
+                        <p>Farm → Processor → Processor → Retailer → You</p>
                     </div>
                     <div class="hero-visual">
                         <div class="hero-badge">Trusted by Farms & Retailers</div>
@@ -1402,30 +1402,30 @@
                 </div>
             </div>
 
-            <!-- Distributor Dashboard -->
-            <div id="distributor-dashboard" class="dashboard-view hidden">
+            <!-- Processor Dashboard (renamed from Distributor) -->
+            <div id="processor-dashboard" class="dashboard-view hidden">
                  <div class="dashboard-header">
-                    <h2>Distributor Dashboard</h2>
+                    <h2>Processor Dashboard</h2>
                     <p>Track and manage incoming and outgoing shipments.</p>
                 </div>
                 
                 <div class="dashboard-stats">
                     <div class="stat-card">
-                        <h3 id="dist-stat-total">0</h3>
+                        <h3 id="proc-stat-total">0</h3>
                         <span>Total Batches</span>
                     </div>
                     <div class="stat-card">
-                        <h3 id="dist-stat-processed">0</h3>
+                        <h3 id="proc-stat-processed">0</h3>
                         <span>Processed</span>
                     </div>
                     <div class="stat-card">
-                        <h3 id="dist-stat-transit">0</h3>
+                        <h3 id="proc-stat-transit">0</h3>
                         <span>In Transit</span>
                     </div>
                 </div>
                 
                 <h3>Assigned Batches</h3>
-                <div id="distributor-product-list" class="product-list">
+                <div id="processor-product-list" class="product-list">
                     <!-- Product cards will be injected here by JS -->
                 </div>
             </div>
@@ -1588,7 +1588,7 @@
             
             let MOCK_USERS_DB = [
                 { id: 'f1', name: 'Farmer User 1', email: 'farmer@test.com', password: 'password', role: 'farmer', contact: '1234567890' },
-                { id: 'd1', name: 'Distributor User 1', email: 'distributor@test.com', password: 'password', role: 'distributor', contact: '1234567890' },
+                { id: 'd1', name: 'Processor User 1', email: 'processor@test.com', password: 'password', role: 'processor', contact: '1234567890' },
                 { id: 'r1', name: 'Retailer User 1', email: 'retailer@test.com', password: 'password', role: 'retailer', contact: '1234567890' },
                 { id: 'c1', name: 'Consumer User 1', email: 'consumer@test.com', password: 'password', role: 'consumer', contact: '1234567890' }
             ];
@@ -1602,8 +1602,8 @@
                     status: 'sold',
                     history: [
                         { status: 'Harvested', by: 'Farmer User 1 (Farmer)', timestamp: new Date('2024-10-26T08:00:00Z'), location: { lat: 19.0760, lng: 72.8777 } },
-                        { status: 'Processed', by: 'Distributor User 1 (Processor)', timestamp: new Date('2024-10-26T14:00:00Z'), location: { lat: 18.5204, lng: 73.8567 } },
-                        { status: 'In Transit', by: 'Retailer User 1 (Distributor)', timestamp: new Date('2024-10-27T09:00:00Z'), location: { lat: 12.9716, lng: 77.5946 } },
+                        { status: 'Processed', by: 'Processor User 1 (Processor)', timestamp: new Date('2024-10-26T14:00:00Z'), location: { lat: 18.5204, lng: 73.8567 } },
+                        { status: 'In Transit', by: 'Retailer User 1 (Processor)', timestamp: new Date('2024-10-27T09:00:00Z'), location: { lat: 12.9716, lng: 77.5946 } },
                         { status: 'Sold', by: 'Consumer User 1 (Consumer)', timestamp: new Date('2024-10-28T18:30:00Z'), location: { lat: 12.9716, lng: 77.5946 } }
                     ]
                 },
@@ -1615,8 +1615,8 @@
                     history: [
                         { status: 'Harvested', by: 'Farmer User 1 (Farmer)', timestamp: new Date('2024-10-27T09:00:00Z'), location: { lat: 19.0760, lng: 72.8777 } },
                         { status: 'In Transit (to Processor)', by: 'Farmer User 1 (Farmer)', timestamp: new Date('2024-10-27T11:00:00Z'), location: { lat: 19.0760, lng: 72.8777 } },
-                        { status: 'Processed', by: 'Distributor User 1 (Processor)', timestamp: new Date('2024-10-27T18:00:00Z'), location: { lat: 18.5204, lng: 73.8567 } },
-                        { status: 'In Transit (to Retailer)', by: 'Distributor User 1 (Processor)', timestamp: new Date('2024-10-28T10:00:00Z'), location: { lat: 18.5204, lng: 73.8567 } },
+                        { status: 'Processed', by: 'Processor User 1 (Processor)', timestamp: new Date('2024-10-27T18:00:00Z'), location: { lat: 18.5204, lng: 73.8567 } },
+                        { status: 'In Transit (to Retailer)', by: 'Processor User 1 (Processor)', timestamp: new Date('2024-10-28T10:00:00Z'), location: { lat: 18.5204, lng: 73.8567 } },
                         { status: 'Received at Retailer', by: 'Retailer User 1 (Retailer)', timestamp: new Date('2024-10-29T11:00:00Z'), location: { lat: 12.9716, lng: 77.5946 } },
                     ]
                 }
@@ -1665,7 +1665,7 @@
             const dashboards = {
                 consumer: document.getElementById('consumer-dashboard'),
                 farmer: document.getElementById('farmer-dashboard'),
-                distributor: document.getElementById('distributor-dashboard'),
+                processor: document.getElementById('processor-dashboard'),
                 retailer: document.getElementById('retailer-dashboard'),
             };
 
@@ -1673,7 +1673,7 @@
             const productLists = {
                 consumer: document.getElementById('consumer-product-list'),
                 farmer: document.getElementById('farmer-product-list'),
-                distributor: document.getElementById('distributor-product-list'),
+                processor: document.getElementById('processor-product-list'),
                 retailer: document.getElementById('retailer-product-list'),
             };
 
@@ -1861,7 +1861,7 @@
                 
                 if (currentUser) {
                     const userName = currentUser.name;
-                    let farmerProducts, distributorProducts, retailerProducts;
+                    let farmerProducts, processorProducts, retailerProducts;
                     
                     switch(currentUser.role) {
                         case 'farmer':
@@ -1870,15 +1870,21 @@
                             renderProductList('farmer', farmerProducts);
                             updateFarmerStats(farmerProducts);
                             break;
-                        case 'distributor':
-                            // Distributor sees batches they have interacted with
-                            distributorProducts = filteredBatches.filter(p => p.history.some(h => h.by.includes(userName)));
-                            renderProductList('distributor', distributorProducts);
-                            updateDistributorStats(distributorProducts);
+                        case 'processor':
+                            // Processor should see batches that are inbound to processors or that they have interacted with
+                            processorProducts = filteredBatches.filter(p => (
+                                ['in-transit-to-processor', 'processed', 'in-transit-to-retailer'].includes(p.status) ||
+                                p.history.some(h => h.by.includes(userName))
+                            ));
+                            renderProductList('processor', processorProducts);
+                            updateProcessorStats(processorProducts);
                             break;
                         case 'retailer':
-                            // Retailer sees batches they have interacted with
-                            retailerProducts = filteredBatches.filter(p => p.history.some(h => h.by.includes(userName)));
+                            // Retailer sees batches inbound to retailers, at retailer, or that they have interacted with
+                            retailerProducts = filteredBatches.filter(p => (
+                                ['in-transit-to-retailer', 'at-retailer', 'sold'].includes(p.status) ||
+                                p.history.some(h => h.by.includes(userName))
+                            ));
                             renderProductList('retailer', retailerProducts);
                             updateRetailerStats(retailerProducts);
                             break;
@@ -1886,10 +1892,10 @@
                 } else {
                      // Clear role-specific dashboards if logged out
                      renderProductList('farmer', []);
-                     renderProductList('distributor', []);
+                     renderProductList('processor', []);
                      renderProductList('retailer', []);
                      updateFarmerStats([]);
-                     updateDistributorStats([]);
+                     updateProcessorStats([]);
                      updateRetailerStats([]);
                 }
             };
@@ -1937,13 +1943,13 @@
             const updateFarmerStats = (products) => {
                 document.getElementById('farmer-stat-total').textContent = products.length;
                 document.getElementById('farmer-stat-harvested').textContent = products.filter(p => p.status === 'harvested').length;
-                document.getElementById('farmer-stat-transit').textContent = products.filter(p => p.status === 'in-transit').length;
+                document.getElementById('farmer-stat-transit').textContent = products.filter(p => p.status === 'in-transit-to-processor').length;
             };
             
-            const updateDistributorStats = (products) => {
-                document.getElementById('dist-stat-total').textContent = products.length;
-                document.getElementById('dist-stat-processed').textContent = products.filter(p => p.status === 'processed').length;
-                document.getElementById('dist-stat-transit').textContent = products.filter(p => p.status === 'in-transit').length;
+            const updateProcessorStats = (products) => {
+                document.getElementById('proc-stat-total').textContent = products.length;
+                document.getElementById('proc-stat-processed').textContent = products.filter(p => p.status === 'processed').length;
+                document.getElementById('proc-stat-transit').textContent = products.filter(p => ['in-transit-to-processor','in-transit-to-retailer'].includes(p.status)).length;
             };
             
             const updateRetailerStats = (products) => {
@@ -1971,20 +1977,30 @@
                             actions += `<button data-action="process" data-id="${product.id}">Send to Processor</button>`;
                         }
                         break;
-                    case 'distributor': 
-                        if (product.status === 'harvested') {
-                             actions += `<button data-action="process" data-id="${product.id}">Process Batch</button>`;
+                    case 'processor': 
+                        // Processor can receive inbound batches (sent by farmer) and process them
+                        if (product.status === 'in-transit-to-processor') {
+                             actions += `<button data-action="process" data-id="${product.id}">Receive & Process</button>`;
                         }
+                        // After processing, can ship to retailer
                         if (product.status === 'processed') {
                              actions += `<button data-action="ship" data-id="${product.id}">Ship to Retailer</button>`;
                         }
                         break;
                     case 'retailer': 
-                        if (product.status === 'in-transit') {
+                        // Retailer receives in-transit-to-retailer shipments
+                        if (product.status === 'in-transit-to-retailer') {
                             actions += `<button data-action="receive_retailer" data-id="${product.id}">Receive at Store</button>`;
                         }
+                        // Retailer can mark in-store batches as sold
                         if(product.status === 'at-retailer'){
                              actions += `<button data-action="sell" data-id="${product.id}">Mark as Sold</button>`;
+                        }
+                        break;
+                    case 'consumer':
+                        // Consumers can buy products that are available at retailer
+                        if (product.status === 'at-retailer') {
+                            actions += `<button data-action="buy" data-id="${product.id}">Buy</button>`;
                         }
                         break;
                 }
@@ -2018,7 +2034,7 @@
                 };
                 
                 // Use more specific roles for history entries
-                if(currentUser.role === 'distributor') {
+                if(currentUser.role === 'processor') {
                     newHistoryEntry.by = `${currentUser.name} (Processor)`;
                 } else if (currentUser.role === 'retailer') {
                      newHistoryEntry.by = `${currentUser.name} (Retailer)`;
@@ -2029,22 +2045,28 @@
                 const retailerLoc = { lat: 12.9716, lng: 77.5946 }; // Bangalore
 
                 // State machine logic for updating product status
-                if (action === 'process' && product.status === 'harvested' && (currentUser.role === 'farmer' || currentUser.rowle === 'distributor')) {
-                    if(currentUser.role === 'farmer') {
-                        newStatus = 'in-transit';
+                if (action === 'process') {
+                    // Farmer sending to processor
+                    if (product.status === 'harvested' && currentUser.role === 'farmer') {
+                        newStatus = 'in-transit-to-processor';
                         newHistoryEntry.status = 'In Transit (to Processor)';
-                        newHistoryEntry.location = product.history[0].location; // Use original farm location
-                    } else if (currentUser.role === 'distributor') {
-                         newStatus = 'processed';
-                         newHistoryEntry.status = 'Processed';
-                         newHistoryEntry.location = processorLoc;
+                        newHistoryEntry.location = product.history[0] ? product.history[0].location : null; // Use original farm location if present
+                    }
+                    // Processor receiving & processing
+                    else if (product.status === 'in-transit-to-processor' && currentUser.role === 'processor') {
+                        newStatus = 'processed';
+                        newHistoryEntry.status = 'Processed';
+                        newHistoryEntry.location = processorLoc;
+                    } else {
+                        showCustomAlert(`Invalid process action for current role/status (${currentUser.role}/${product.status}).`);
+                        return;
                     }
 
-                } else if (action === 'ship' && product.status === 'processed' && currentUser.role === 'distributor') {
-                     newStatus = 'in-transit';
+                } else if (action === 'ship' && product.status === 'processed' && currentUser.role === 'processor') {
+                     newStatus = 'in-transit-to-retailer';
                      newHistoryEntry.status = 'In Transit (to Retailer)';
                      newHistoryEntry.location = processorLoc;
-                } else if (action === 'receive_retailer' && product.status === 'in-transit' && currentUser.role === 'retailer') {
+                } else if (action === 'receive_retailer' && product.status === 'in-transit-to-retailer' && currentUser.role === 'retailer') {
                     newStatus = 'at-retailer';
                     newHistoryEntry.status = 'Received at Retailer';
                     newHistoryEntry.location = retailerLoc;
@@ -2052,6 +2074,10 @@
                     newStatus = 'sold';
                     newHistoryEntry.status = 'Sold';
                     newHistoryEntry.location = retailerLoc;
+                } else if (action === 'buy' && product.status === 'at-retailer' && currentUser.role === 'consumer') {
+                    newStatus = 'sold';
+                    newHistoryEntry.status = 'Purchased';
+                    newHistoryEntry.location = product.history[product.history.length-1] ? product.history[product.history.length-1].location : null;
                 } else {
                     showCustomAlert(`Invalid action or status for current user role: ${currentUser.role}`);
                     return;
@@ -2423,12 +2449,13 @@
             const chatForm = document.getElementById('chat-form');
             const chatInput = document.getElementById('chat-input');
             
-            // !! API KEY INTEGRATED AS REQUESTED !!
-            // This is the key you provided. 
-            // !! DANGER: Delete this key from your Google Console immediately.
-            const GEMINI_API_KEY = 'AIzaSyD4YGpH1dmrKm81PG117zGjh2mGArZ4uGU'; 
-            
+            // Embedded API key (client-side) per user request.
+            // WARNING: This exposes the key to anyone who loads the site. Rotate the key
+            // in your Google Cloud Console after testing and consider using a server-side proxy.
+            const GEMINI_API_KEY = 'AIzaSyD4YGpH1dmrKm81PG117zGjh2mGArZ4uGU';
+
             // Updated the URL to the correct model endpoint.
+            // NOTE: For production, avoid sending keys from client-side. Proxy requests via backend.
             const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
 
             /**
