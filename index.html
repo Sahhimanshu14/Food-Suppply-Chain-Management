@@ -178,7 +178,7 @@
             text-decoration: underline;
         }
         
-        /* --- NEW: Password validation styles --- */
+        /* --- Password validation styles --- */
         .password-rules {
             font-size: 0.8rem;
             color: var(--text-secondary);
@@ -191,7 +191,6 @@
             border-color: #e74c3c;
             box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
         }
-        /* --- END NEW --- */
         
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -291,7 +290,7 @@
             font-size: 1rem;
         }
         
-        /* --- NEW: Help Button Styles --- */
+        /* --- Help Button Styles --- */
         .side-menu-nav {
             margin-bottom: 1.5rem;
             display: flex;
@@ -323,7 +322,6 @@
             height: 22px;
             color: var(--text-secondary);
         }
-        /* --- END NEW --- */
 
 
         .user-info {
@@ -549,6 +547,9 @@
         }
          .status-harvested { background: rgba(194, 169, 120, 0.2); color: #9b6f27;}
         .status-in-transit { background: rgba(52, 152, 219, 0.2); color: #2980b9;}
+        .status-in-transit-to-processor { background: rgba(52, 152, 219, 0.2); color: #2980b9;}
+        .status-in-transit-to-retailer { background: rgba(52, 152, 219, 0.2); color: #2980b9;}
+        .status-processed { background: rgba(155, 89, 182, 0.2); color: #8e44ad;}
         .status-at-retailer { background: rgba(230, 126, 34, 0.2); color: #d35400;}
         .status-sold { background: rgba(46, 204, 113, 0.2); color: #27ae60;}
 
@@ -737,7 +738,7 @@
             border-radius: var(--radius-sm);
         }
         
-        /* --- NEW: Help Modal Styles --- */
+        /* --- Help Modal Styles --- */
         .help-intro {
             font-size: 1rem;
             color: var(--text-secondary);
@@ -775,7 +776,6 @@
             font-size: 0.9rem;
             color: var(--text-secondary);
         }
-        /* --- END NEW --- */
 
 
         /* --- Hero Section (Consumer Dashboard) --- */
@@ -1217,7 +1217,6 @@
                     <div class="form-group">
                         <label for="register-password">Password</label>
                         <input type="password" id="register-password" required>
-                        <!-- NEW: Password rules helper text -->
                         <p class="password-rules hidden">Must be at least 8 characters and include letters, numbers, and symbols (e.g., !@#$).</p>
                     </div>
                     <button type="submit" class="login-btn-primary">Register</button>
@@ -1261,7 +1260,6 @@
                     <div class="form-group">
                         <label for="new-password">New Password</label>
                         <input type="password" id="new-password" required>
-                        <!-- NEW: Password rules helper text -->
                         <p class="password-rules hidden">Must be at least 8 characters and include letters, numbers, and symbols (e.g., !@#$).</p>
                     </div>
                     <div class="form-group">
@@ -1493,7 +1491,6 @@
         </div>
 
         <!-- =============== DYNAMIC CHATBOT UI =============== -->
-        <!-- MOVED: Chatbot HTML is now inside the #app-container -->
         <div class="chat-widget-container">
             
             <!-- The Chat Window (hidden by default) -->
@@ -1580,31 +1577,32 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     
-    <!-- Main Application & Chatbot JavaScript -->
+    <!-- Main Application Logic -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            // --- MOCK BACKEND & DATA ---
-            
-            let MOCK_USERS_DB = [
+            // --- LOCAL STORAGE BACKEND SIMULATION ---
+            // This effectively replaces the Firebase database with your browser's local storage.
+            // Data will persist even if you refresh the page!
+
+            const DEFAULT_USERS = [
                 { id: 'f1', name: 'Farmer User 1', email: 'farmer@test.com', password: 'password', role: 'farmer', contact: '1234567890' },
                 { id: 'd1', name: 'Processor User 1', email: 'processor@test.com', password: 'password', role: 'processor', contact: '1234567890' },
                 { id: 'r1', name: 'Retailer User 1', email: 'retailer@test.com', password: 'password', role: 'retailer', contact: '1234567890' },
                 { id: 'c1', name: 'Consumer User 1', email: 'consumer@test.com', password: 'password', role: 'consumer', contact: '1234567890' }
             ];
 
-            // Mock data for product batches
-            let productBatches = [
+            const DEFAULT_BATCHES = [
                 {
                     id: `batch-1672531200000`,
                     name: 'Organic Tomatoes',
                     quantity: 200,
                     status: 'sold',
                     history: [
-                        { status: 'Harvested', by: 'Farmer User 1 (Farmer)', timestamp: new Date('2024-10-26T08:00:00Z'), location: { lat: 19.0760, lng: 72.8777 } },
-                        { status: 'Processed', by: 'Processor User 1 (Processor)', timestamp: new Date('2024-10-26T14:00:00Z'), location: { lat: 18.5204, lng: 73.8567 } },
-                        { status: 'In Transit', by: 'Retailer User 1 (Processor)', timestamp: new Date('2024-10-27T09:00:00Z'), location: { lat: 12.9716, lng: 77.5946 } },
-                        { status: 'Sold', by: 'Consumer User 1 (Consumer)', timestamp: new Date('2024-10-28T18:30:00Z'), location: { lat: 12.9716, lng: 77.5946 } }
+                        { status: 'Harvested', by: 'Farmer User 1 (Farmer)', timestamp: new Date('2024-10-26T08:00:00Z').toISOString(), location: { lat: 19.0760, lng: 72.8777 } },
+                        { status: 'Processed', by: 'Processor User 1 (Processor)', timestamp: new Date('2024-10-26T14:00:00Z').toISOString(), location: { lat: 18.5204, lng: 73.8567 } },
+                        { status: 'In Transit', by: 'Retailer User 1 (Processor)', timestamp: new Date('2024-10-27T09:00:00Z').toISOString(), location: { lat: 12.9716, lng: 77.5946 } },
+                        { status: 'Sold', by: 'Consumer User 1 (Consumer)', timestamp: new Date('2024-10-28T18:30:00Z').toISOString(), location: { lat: 12.9716, lng: 77.5946 } }
                     ]
                 },
                 {
@@ -1613,21 +1611,75 @@
                     quantity: 500,
                     status: 'at-retailer',
                     history: [
-                        { status: 'Harvested', by: 'Farmer User 1 (Farmer)', timestamp: new Date('2024-10-27T09:00:00Z'), location: { lat: 19.0760, lng: 72.8777 } },
-                        { status: 'In Transit (to Processor)', by: 'Farmer User 1 (Farmer)', timestamp: new Date('2024-10-27T11:00:00Z'), location: { lat: 19.0760, lng: 72.8777 } },
-                        { status: 'Processed', by: 'Processor User 1 (Processor)', timestamp: new Date('2024-10-27T18:00:00Z'), location: { lat: 18.5204, lng: 73.8567 } },
-                        { status: 'In Transit (to Retailer)', by: 'Processor User 1 (Processor)', timestamp: new Date('2024-10-28T10:00:00Z'), location: { lat: 18.5204, lng: 73.8567 } },
-                        { status: 'Received at Retailer', by: 'Retailer User 1 (Retailer)', timestamp: new Date('2024-10-29T11:00:00Z'), location: { lat: 12.9716, lng: 77.5946 } },
+                        { status: 'Harvested', by: 'Farmer User 1 (Farmer)', timestamp: new Date('2024-10-27T09:00:00Z').toISOString(), location: { lat: 19.0760, lng: 72.8777 } },
+                        { status: 'In Transit (to Processor)', by: 'Farmer User 1 (Farmer)', timestamp: new Date('2024-10-27T11:00:00Z').toISOString(), location: { lat: 19.0760, lng: 72.8777 } },
+                        { status: 'Processed', by: 'Processor User 1 (Processor)', timestamp: new Date('2024-10-27T18:00:00Z').toISOString(), location: { lat: 18.5204, lng: 73.8567 } },
+                        { status: 'In Transit (to Retailer)', by: 'Processor User 1 (Processor)', timestamp: new Date('2024-10-28T10:00:00Z').toISOString(), location: { lat: 18.5204, lng: 73.8567 } },
+                        { status: 'Received at Retailer', by: 'Retailer User 1 (Retailer)', timestamp: new Date('2024-10-29T11:00:00Z').toISOString(), location: { lat: 12.9716, lng: 77.5946 } },
                     ]
                 }
             ];
+
+            // --- LOCAL DB ABSTRACTION LAYER ---
+            const LocalDB = {
+                init: () => {
+                    if(!localStorage.getItem('fs_users')) {
+                        localStorage.setItem('fs_users', JSON.stringify(DEFAULT_USERS));
+                        console.log("Database seeded with default users.");
+                    }
+                    if(!localStorage.getItem('fs_batches')) {
+                        localStorage.setItem('fs_batches', JSON.stringify(DEFAULT_BATCHES));
+                        console.log("Database seeded with default batches.");
+                    }
+                },
+                getUsers: () => {
+                    return JSON.parse(localStorage.getItem('fs_users') || '[]');
+                },
+                addUser: (user) => {
+                    const users = LocalDB.getUsers();
+                    users.push(user);
+                    localStorage.setItem('fs_users', JSON.stringify(users));
+                    return user;
+                },
+                getBatches: () => {
+                    return JSON.parse(localStorage.getItem('fs_batches') || '[]');
+                },
+                addBatch: (batch) => {
+                    const batches = LocalDB.getBatches();
+                    batches.push(batch);
+                    localStorage.setItem('fs_batches', JSON.stringify(batches));
+                    return batch;
+                },
+                updateBatch: (updatedBatch) => {
+                    const batches = LocalDB.getBatches();
+                    const index = batches.findIndex(b => b.id === updatedBatch.id);
+                    if (index !== -1) {
+                        batches[index] = updatedBatch;
+                        localStorage.setItem('fs_batches', JSON.stringify(batches));
+                        return true;
+                    }
+                    return false;
+                },
+                updateUser: (updatedUser) => {
+                    const users = LocalDB.getUsers();
+                    const index = users.findIndex(u => u.id === updatedUser.id);
+                    if (index !== -1) {
+                        users[index] = updatedUser;
+                        localStorage.setItem('fs_users', JSON.stringify(users));
+                        return true;
+                    }
+                    return false;
+                }
+            };
             
+            // Initialize DB
+            LocalDB.init();
+
             let currentUser = null;
             let map; // Leaflet map instance
             let polyline; // Leaflet polyline instance
 
-            // --- DOM ELEMENTS (Main App) ---
-            
+            // --- DOM ELEMENTS ---
             const loginView = document.getElementById('login-view');
             const appContainer = document.getElementById('app-container');
             const loginFormElement = document.getElementById('login-form-element');
@@ -1635,7 +1687,6 @@
             const showRegisterLink = document.getElementById('show-register-link');
             const showLoginLink = document.getElementById('show-login-link');
             
-            // Password reset DOM elements
             const forgotPasswordForm = document.getElementById('forgot-password-form');
             const otpForm = document.getElementById('otp-form');
             const resetPasswordForm = document.getElementById('reset-password-form');
@@ -1644,12 +1695,10 @@
             const otpShowLoginLink = document.getElementById('otp-show-login-link');
             const resetShowLoginLink = document.getElementById('reset-show-login-link');
             
-            // Custom Alert DOM elements
             const customAlertModal = document.getElementById('custom-alert-modal');
             const customAlertMessage = document.getElementById('custom-alert-message');
             const customAlertCloseBtn = document.getElementById('custom-alert-close-btn');
             
-            // NEW: Help Modal DOM Elements
             const helpSupportBtn = document.getElementById('help-support-btn');
             const helpModal = document.getElementById('help-modal');
             const closeHelpModalBtn = document.getElementById('close-help-modal');
@@ -1661,7 +1710,6 @@
             const userInfo = document.getElementById('user-info');
             const searchInput = document.getElementById('search-input');
             
-            // Caching all dashboard elements
             const dashboards = {
                 consumer: document.getElementById('consumer-dashboard'),
                 farmer: document.getElementById('farmer-dashboard'),
@@ -1669,7 +1717,6 @@
                 retailer: document.getElementById('retailer-dashboard'),
             };
 
-            // Caching all product list elements
             const productLists = {
                 consumer: document.getElementById('consumer-product-list'),
                 farmer: document.getElementById('farmer-product-list'),
@@ -1681,64 +1728,43 @@
             const trackingModal = document.getElementById('tracking-modal');
             const closeModalBtn = document.getElementById('close-modal');
             
-            // variables for password reset
             let tempUserForPasswordReset = null;
-            let generatedOTP = null; // Variable to store the generated OTP
-            
-            // --- APP LOGIC (Main App) ---
-            
-            /**
-             * Shows the custom alert modal.
-             * @param {string} message - The message to display.
-             */
+            let generatedOTP = null;
+
+            // --- APP LOGIC ---
             const showCustomAlert = (message) => {
                 customAlertMessage.textContent = message;
                 customAlertModal.classList.add('visible');
             };
             
-            /**
-             * Hides the custom alert modal.
-             */
             const hideCustomAlert = () => {
                 customAlertModal.classList.remove('visible');
             };
             
-            /**
-             * NEW: Validates password strength.
-             * @param {string} password - The password to check.
-             * @returns {boolean} - True if the password is valid, false otherwise.
-             */
             const isValidPassword = (password) => {
                 const hasMinLength = password.length >= 8;
                 const hasLetter = /[a-zA-Z]/.test(password);
                 const hasNumber = /\d/.test(password);
-                // Basic symbol check
                 const hasSymbol = /[!@#$%^&*(),.?":{}|<>]/.test(password);
                 return hasMinLength && hasLetter && hasNumber && hasSymbol;
             };
             
-
-            /**
-             * Initializes the main application, binds event listeners, and shows the login screen.
-             */
             const initApp = () => {
                 bindEventListeners();
-                renderAllDashboards(); // Initial render (will be empty)
+                // Render initial consumer view (public)
+                renderAllDashboards(); 
                 loginView.classList.remove('hidden');
                 appContainer.classList.add('hidden');
             };
             
-            /**
-             * Handles user login attempt.
-             */
             const handleLogin = (e) => {
                 e.preventDefault();
-                // UPDATED: Get value from the new 'email-or-phone' input
                 const emailOrPhone = document.getElementById('login-email-phone').value;
                 const password = document.getElementById('login-password').value;
                 
-                // UPDATED: Find user by email OR phone
-                const user = MOCK_USERS_DB.find(u => (u.email === emailOrPhone || u.contact === emailOrPhone));
+                const users = LocalDB.getUsers();
+                // Find user by email OR phone
+                const user = users.find(u => (u.email === emailOrPhone || u.contact === emailOrPhone));
                 
                 if (user) {
                     if (user.password === password) {
@@ -1752,9 +1778,6 @@
                 }
             };
             
-            /**
-             * Handles new user registration.
-             */
             const handleRegister = (e) => {
                 e.preventDefault();
                 const name = document.getElementById('register-name').value;
@@ -1764,18 +1787,15 @@
                 const password = document.getElementById('register-password').value;
                 const passwordInputEl = document.getElementById('register-password');
                 
-                // --- NEW: Password Validation ---
                 if (!isValidPassword(password)) {
                     showCustomAlert('Password is not strong enough. It must be at least 8 characters and include letters, numbers, and symbols (e.g., !@#$).');
-                    // Add invalid class to parent form-group
                     passwordInputEl.closest('.form-group').classList.add('invalid');
                     return;
                 }
-                // Remove invalid class if it was there
                 passwordInputEl.closest('.form-group').classList.remove('invalid');
-                // --- END NEW ---
                 
-                if (MOCK_USERS_DB.find(u => u.email === email)) {
+                const users = LocalDB.getUsers();
+                if (users.find(u => u.email === email)) {
                     showCustomAlert('An account with this email already exists.');
                     return;
                 }
@@ -1789,17 +1809,13 @@
                     contact: contact
                 };
                 
-                MOCK_USERS_DB.push(newUser);
+                LocalDB.addUser(newUser);
                 showCustomAlert('Registration successful! Please log in.');
                 registerFormElement.reset();
                 loginFormElement.classList.remove('hidden');
                 registerFormElement.classList.add('hidden');
             };
 
-            /**
-             * Sets up the app state after a successful login.
-             * @param {object} user - The logged-in user object.
-             */
             const postLoginSetup = (user) => {
                 currentUser = user;
                 
@@ -1815,48 +1831,34 @@
                 renderAllDashboards();
             };
 
-            /**
-             * Logs the user out and resets the app to the login screen.
-             */
             const logout = () => {
                 currentUser = null;
-                
                 appContainer.classList.add('hidden');
                 loginView.classList.remove('hidden');
-                
                 userInfo.classList.add('hidden');
-                
-                switchView('consumer'); // Default to consumer view on logout
+                switchView('consumer'); 
                 renderAllDashboards(); 
             };
 
-            /**
-             * Switches the visible dashboard based on the user's role.
-             * @param {string} role - The user's role (e.g., 'farmer', 'consumer').
-             */
             const switchView = (role) => {
                 Object.values(dashboards).forEach(d => d.classList.add('hidden'));
-                
                 if (currentUser && dashboards[role]) {
                     dashboards[role].classList.remove('hidden');
                 } else {
-                    // Default to consumer dashboard if role is invalid or user is logged out
                     dashboards.consumer.classList.remove('hidden');
                 }
             };
             
-            /**
-             * Renders all product lists and dashboard stats, filtering by search term.
-             * @param {string} [searchTerm=''] - The text to filter products by.
-             */
             const renderAllDashboards = (searchTerm = '') => {
+                // Always fetch fresh data from LocalDB
+                const productBatches = LocalDB.getBatches();
+                
                  const lowerCaseSearchTerm = searchTerm.toLowerCase();
                  const filteredBatches = productBatches.filter(p => 
                      p.name.toLowerCase().includes(lowerCaseSearchTerm) || 
                      p.id.toLowerCase().includes(lowerCaseSearchTerm)
                  );
                  
-                // Consumer always sees all filtered batches
                 renderProductList('consumer', filteredBatches);
                 
                 if (currentUser) {
@@ -1865,32 +1867,28 @@
                     
                     switch(currentUser.role) {
                         case 'farmer':
-                            // Farmer sees batches they created
-                            farmerProducts = filteredBatches.filter(p => p.history[0] && p.history[0].by.includes(userName));
+                            farmerProducts = filteredBatches.filter(p => p.history[0] && p.history[0].by.includes(currentUser.name));
                             renderProductList('farmer', farmerProducts);
                             updateFarmerStats(farmerProducts);
                             break;
                         case 'processor':
-                            // Processor should see batches that are inbound to processors or that they have interacted with
                             processorProducts = filteredBatches.filter(p => (
                                 ['in-transit-to-processor', 'processed', 'in-transit-to-retailer'].includes(p.status) ||
-                                p.history.some(h => h.by.includes(userName))
+                                p.history.some(h => h.by.includes(currentUser.name))
                             ));
                             renderProductList('processor', processorProducts);
                             updateProcessorStats(processorProducts);
                             break;
                         case 'retailer':
-                            // Retailer sees batches inbound to retailers, at retailer, or that they have interacted with
                             retailerProducts = filteredBatches.filter(p => (
                                 ['in-transit-to-retailer', 'at-retailer', 'sold'].includes(p.status) ||
-                                p.history.some(h => h.by.includes(userName))
+                                p.history.some(h => h.by.includes(currentUser.name))
                             ));
                             renderProductList('retailer', retailerProducts);
                             updateRetailerStats(retailerProducts);
                             break;
                     }
                 } else {
-                     // Clear role-specific dashboards if logged out
                      renderProductList('farmer', []);
                      renderProductList('processor', []);
                      renderProductList('retailer', []);
@@ -1900,15 +1898,10 @@
                 }
             };
 
-            /**
-             * Renders the product cards for a specific role's dashboard.
-             * @param {string} role - The dashboard role (e.g., 'farmer').
-             * @param {Array<object>} products - The array of product objects to render.
-             */
             const renderProductList = (role, products) => {
                 const listEl = productLists[role];
                 if (!listEl) return;
-                listEl.innerHTML = ''; // Clear existing list
+                listEl.innerHTML = '';
 
                 if (products.length === 0) {
                     listEl.innerHTML = '<p>No batches found.</p>';
@@ -1925,7 +1918,7 @@
                         </div>
                         <p><strong>Quantity:</strong> ${product.quantity} kg</p>
                         <p><strong>Batch ID:</strong> ${product.id}</p>
-                        <p><strong>Last Update:</strong> ${new Date(product.history[product.history.length-1].timestamp).toLocaleString()}</p>
+                        <p><strong>Last Update:</strong> ${product.history && product.history.length ? new Date(product.history[product.history.length-1].timestamp).toLocaleString() : 'N/A'}</p>
                         <div class="product-actions">
                             ${getActionsForRole(role, product)}
                         </div>
@@ -1939,7 +1932,6 @@
                 });
             };
 
-            // --- Dashboard Stat Update Functions ---
             const updateFarmerStats = (products) => {
                 document.getElementById('farmer-stat-total').textContent = products.length;
                 document.getElementById('farmer-stat-harvested').textContent = products.filter(p => p.status === 'harvested').length;
@@ -1958,19 +1950,9 @@
                 document.getElementById('retail-stat-sold').textContent = products.filter(p => p.status === 'sold').length;
             };
 
-            /**
-             * Generates the HTML for action buttons based on user role and product status.
-             * @param {string} role - The dashboard role.
-             * @param {object} product - The product batch object.
-             * @returns {string} HTML string for the buttons.
-             */
             const getActionsForRole = (role, product) => {
-                // "View Journey" is available to everyone
                 let actions = `<button class="scan-btn" data-id="${product.id}">View Journey</button>`;
-                
-                // Only show role-specific actions if the current user matches the dashboard role
                 if (!currentUser || currentUser.role !== role) return actions;
-
                 switch(role) {
                     case 'farmer':
                         if (product.status === 'harvested') {
@@ -1978,27 +1960,22 @@
                         }
                         break;
                     case 'processor': 
-                        // Processor can receive inbound batches (sent by farmer) and process them
                         if (product.status === 'in-transit-to-processor') {
                              actions += `<button data-action="process" data-id="${product.id}">Receive & Process</button>`;
                         }
-                        // After processing, can ship to retailer
                         if (product.status === 'processed') {
                              actions += `<button data-action="ship" data-id="${product.id}">Ship to Retailer</button>`;
                         }
                         break;
                     case 'retailer': 
-                        // Retailer receives in-transit-to-retailer shipments
                         if (product.status === 'in-transit-to-retailer') {
                             actions += `<button data-action="receive_retailer" data-id="${product.id}">Receive at Store</button>`;
                         }
-                        // Retailer can mark in-store batches as sold
                         if(product.status === 'at-retailer'){
                              actions += `<button data-action="sell" data-id="${product.id}">Mark as Sold</button>`;
                         }
                         break;
                     case 'consumer':
-                        // Consumers can buy products that are available at retailer
                         if (product.status === 'at-retailer') {
                             actions += `<button data-action="buy" data-id="${product.id}">Buy</button>`;
                         }
@@ -2007,23 +1984,19 @@
                 return actions;
             };
 
-            /**
-             * Handles clicks on product card action buttons (e.g., 'View Journey', 'Process Batch').
-             */
             const handleProductAction = (e) => {
                 const target = e.target;
                 const action = target.dataset.action;
                 const id = target.dataset.id;
 
-                // Handle "View Journey" click
                 if (target.classList.contains('scan-btn')) {
                     showTrackingModal(id);
                     return;
                 }
 
-                // Handle other actions
                 if (!action || !id || !currentUser) return;
                 
+                const productBatches = LocalDB.getBatches();
                 const product = productBatches.find(p => p.id === id);
                 if (!product) return;
                 
@@ -2033,35 +2006,26 @@
                     timestamp: new Date().toISOString() 
                 };
                 
-                // Use more specific roles for history entries
                 if(currentUser.role === 'processor') {
                     newHistoryEntry.by = `${currentUser.name} (Processor)`;
                 } else if (currentUser.role === 'retailer') {
                      newHistoryEntry.by = `${currentUser.name} (Retailer)`;
                 }
 
-                // Mock locations for demo
-                const processorLoc = { lat: 18.5204, lng: 73.8567 }; // Pune
-                const retailerLoc = { lat: 12.9716, lng: 77.5946 }; // Bangalore
+                const processorLoc = { lat: 18.5204, lng: 73.8567 }; 
+                const retailerLoc = { lat: 12.9716, lng: 77.5946 }; 
 
-                // State machine logic for updating product status
                 if (action === 'process') {
-                    // Farmer sending to processor
                     if (product.status === 'harvested' && currentUser.role === 'farmer') {
                         newStatus = 'in-transit-to-processor';
                         newHistoryEntry.status = 'In Transit (to Processor)';
-                        newHistoryEntry.location = product.history[0] ? product.history[0].location : null; // Use original farm location if present
+                        newHistoryEntry.location = product.history[0] ? product.history[0].location : null;
                     }
-                    // Processor receiving & processing
                     else if (product.status === 'in-transit-to-processor' && currentUser.role === 'processor') {
                         newStatus = 'processed';
                         newHistoryEntry.status = 'Processed';
                         newHistoryEntry.location = processorLoc;
-                    } else {
-                        showCustomAlert(`Invalid process action for current role/status (${currentUser.role}/${product.status}).`);
-                        return;
                     }
-
                 } else if (action === 'ship' && product.status === 'processed' && currentUser.role === 'processor') {
                      newStatus = 'in-transit-to-retailer';
                      newHistoryEntry.status = 'In Transit (to Retailer)';
@@ -2078,27 +2042,19 @@
                     newStatus = 'sold';
                     newHistoryEntry.status = 'Purchased';
                     newHistoryEntry.location = product.history[product.history.length-1] ? product.history[product.history.length-1].location : null;
-                } else {
-                    showCustomAlert(`Invalid action or status for current user role: ${currentUser.role}`);
-                    return;
                 }
 
-                // If a valid action was taken, update the product and re-render
                 if(newStatus) {
                     product.status = newStatus;
                     product.history.push(newHistoryEntry);
-                    renderAllDashboards(searchInput.value); // Re-render to reflect changes
+                    LocalDB.updateBatch(product); // SAVE TO DB
+                    renderAllDashboards(searchInput.value);
                     showCustomAlert(`Product Batch ${id} updated to: ${newStatus.toUpperCase()}`);
                 }
             };
             
-            // --- Helper/Utility Functions ---
-            
-            /**
-             * Shows the tracking modal with details for a specific product.
-             * @param {string} id - The product batch ID.
-             */
             const showTrackingModal = (id) => {
+                const productBatches = LocalDB.getBatches();
                 const product = productBatches.find(p => p.id === id);
                 if (!product) return;
 
@@ -2110,17 +2066,10 @@
                 trackingModal.classList.add('visible');
             };
 
-            /**
-             * Renders the vertical timeline in the tracking modal.
-             * @param {Array<object>} history - The product's history array.
-             */
             const renderTimeline = (history) => {
                 const timelineEl = document.getElementById('tracking-timeline');
                 timelineEl.innerHTML = '';
-
-                // Sort history from newest to oldest for display
                 const sortedHistory = [...history].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); 
-
                 sortedHistory.forEach(item => {
                     const li = document.createElement('li');
                     li.className = 'timeline-item';
@@ -2132,18 +2081,13 @@
                 });
             };
 
-            /**
-             * Renders the Leaflet map in the tracking modal.
-             * @param {Array<object>} history - The product's history array.
-             */
             const renderMap = (history) => {
-                // Remove previous map instance if it exists
                 if(map) {
                     map.remove();
                 }
                 
                 const coordinates = history
-                    .filter(item => item.location) // Only get items with location data
+                    .filter(item => item.location) 
                     .map(item => [item.location.lat, item.location.lng]);
 
                 if (coordinates.length === 0) {
@@ -2151,26 +2095,21 @@
                     return;
                 }
 
-                // Set map center to the last known location
                 const center = coordinates[coordinates.length - 1]; 
                 map = L.map('map').setView(center, 10);
 
-                // Add OpenStreetMap tile layer
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
                     attribution: '© OpenStreetMap contributors'
                 }).addTo(map);
 
-                // Add markers for each location in history
                 history.filter(item => item.location).forEach(item => {
                      L.marker([item.location.lat, item.location.lng]).addTo(map)
                          .bindPopup(`<b>${item.status}</b><br>By: ${item.by}`);
                 });
 
-                // Draw a line connecting the points
                 polyline = L.polyline(coordinates, {color: 'var(--accent-primary)'}).addTo(map);
 
-                // Zoom the map to fit the path
                 if (coordinates.length > 1) {
                     map.fitBounds(polyline.getBounds());
                 } else if (coordinates.length === 1) {
@@ -2178,13 +2117,9 @@
                 }
             };
 
-            /**
-             * Generates a QR code in the tracking modal.
-             * @param {string} data - The data to encode (product ID).
-             */
             const generateQRCode = (data) => {
                 const qrContainer = document.getElementById('modal-qr-code');
-                qrContainer.innerHTML = ''; // Clear previous QR
+                qrContainer.innerHTML = ''; 
                 const canvas = document.createElement('canvas');
                 canvas.id = 'qr-canvas';
                 qrContainer.appendChild(canvas);
@@ -2193,21 +2128,16 @@
                     element: canvas,
                     value: data,
                     size: 150,
-                    level: 'H' // High error correction
+                    level: 'H' 
                 });
             };
             
-            /**
-             * Binds all initial event listeners for the main application.
-             */
             const bindEventListeners = () => {
-                // Menu navigation
                 openMenuBtn.addEventListener('click', () => sideMenu.classList.add('open'));
                 closeMenuBtn.addEventListener('click', () => sideMenu.classList.remove('open'));
                 
-                // Modal close events
                 trackingModal.addEventListener('click', (e) => {
-                    if (e.target === trackingModal) { // Click on overlay
+                    if (e.target === trackingModal) {
                         trackingModal.classList.remove('visible');
                     }
                 });
@@ -2215,10 +2145,9 @@
                      trackingModal.classList.remove('visible');
                 });
                 
-                // NEW: Help Modal Listeners
                 helpSupportBtn.addEventListener('click', () => {
                     helpModal.classList.add('visible');
-                    sideMenu.classList.remove('open'); // Close menu when modal opens
+                    sideMenu.classList.remove('open');
                 });
 
                 closeHelpModalBtn.addEventListener('click', () => {
@@ -2226,13 +2155,11 @@
                 });
 
                 helpModal.addEventListener('click', (e) => {
-                    if (e.target === helpModal) { // Click on overlay
+                    if (e.target === helpModal) {
                         helpModal.classList.remove('visible');
                     }
                 });
-                // END NEW
 
-                // Login/Register form toggling
                 showRegisterLink.addEventListener('click', (e) => {
                     e.preventDefault();
                     loginFormElement.classList.add('hidden');
@@ -2244,13 +2171,11 @@
                     loginFormElement.classList.remove('hidden');
                 });
                 
-                // Form submissions
                 loginFormElement.addEventListener('submit', handleLogin);
                 registerFormElement.addEventListener('submit', handleRegister);
                 
                 logoutBtn.addEventListener('click', logout);
                 
-                // Farmer's "Add Product" form
                 addProductForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     if (!currentUser || currentUser.role !== 'farmer') {
@@ -2262,7 +2187,6 @@
                     const quantity = document.getElementById('product-quantity').value;
                     const harvestDate = document.getElementById('harvest-date').value;
 
-                    // Create new batch and add to mock DB
                     const newBatch = {
                         id: `batch-${Date.now()}`,
                         name: name,
@@ -2273,32 +2197,27 @@
                                 status: 'Harvested', 
                                 by: `${currentUser.name} (Farmer)`, 
                                 timestamp: new Date(harvestDate).toISOString(),
-                                location: { lat: 19.0760, lng: 72.8777 } // Mock farm location
+                                location: { lat: 19.0760, lng: 72.8777 }
                             }
                         ]
                     };
-                    productBatches.push(newBatch);
+
+                    LocalDB.addBatch(newBatch);
                     e.target.reset();
-                    renderAllDashboards(); // Re-render to show new batch
-                    showCustomAlert(`New Batch '${name}' added with ID: ${newBatch.id}`);
+                    renderAllDashboards();
+                    showCustomAlert(`New Batch '${name}' added to database.`);
                 });
 
-                // Event delegation for all product lists
                 document.querySelectorAll('.product-list').forEach(list => {
                     list.addEventListener('click', handleProductAction);
                 });
 
-                // Search bar input
                 searchInput.addEventListener('input', (e) => {
                     renderAllDashboards(e.target.value);
                 });
                 
-                // Set current year in footer
                 document.getElementById('currentYear').textContent = new Date().getFullYear();
             
-                // --- NEW EVENT LISTENERS ---
-                
-                // Custom Alert Close Button
                 customAlertCloseBtn.addEventListener('click', hideCustomAlert);
                 customAlertModal.addEventListener('click', (e) => {
                     if (e.target === customAlertModal) {
@@ -2306,7 +2225,6 @@
                     }
                 });
                 
-                // Password Reset Flow Listeners
                 const showLoginForm = () => {
                     loginFormElement.classList.remove('hidden');
                     registerFormElement.classList.add('hidden');
@@ -2329,35 +2247,33 @@
                 forgotPasswordForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     const emailOrPhone = document.getElementById('forgot-email-phone').value;
-                    const user = MOCK_USERS_DB.find(u => u.email === emailOrPhone || u.contact === emailOrPhone);
                     
+                    const users = LocalDB.getUsers();
+                    const user = users.find(u => u.email === emailOrPhone);
+
                     if (user) {
                         tempUserForPasswordReset = user;
+                        generatedOTP = Math.floor(1000 + Math.random() * 9000).toString(); 
                         
-                        generatedOTP = Math.floor(1000 + Math.random() * 9000).toString(); // 4-digit OTP
-                        
-                        // Simulate sending OTP. In a real app, this is where you'd call your backend.
-                        // THIS IS WHERE YOU WOULD CALL YOUR BACKEND TO SEND THE SMS VIA TWILIO.
                         console.log(`******************************`);
-                        console.log(`* SIMULATING TWILIO SMS: Sending OTP ${generatedOTP} to ${user.contact} *`);
+                        console.log(`* SIMULATING SMS: Sending OTP ${generatedOTP} to ${user.contact} *`);
                         console.log(`******************************`);
 
                         forgotPasswordForm.classList.add('hidden');
                         otpForm.classList.remove('hidden');
-                        
-                        showCustomAlert(`An OTP has been sent to your registered email and phone number via SMS (simulated). (For this demo, please check the browser console for the OTP).`);
+                        showCustomAlert(`An OTP has been sent. (Check console for demo OTP).`);
                     } else {
-                        showCustomAlert('No account found with that email or phone number.');
+                        showCustomAlert('No account found with that email.');
                     }
                 });
                 
                 otpForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     const otp = document.getElementById('otp-input').value;
-                    if (otp === generatedOTP && generatedOTP !== null) { // Check against the stored generated OTP
+                    if (otp === generatedOTP && generatedOTP !== null) { 
                         otpForm.classList.add('hidden');
                         resetPasswordForm.classList.remove('hidden');
-                        generatedOTP = null; // Clear the OTP after use
+                        generatedOTP = null; 
                     } else {
                         showCustomAlert('Invalid OTP. Please try again.');
                     }
@@ -2374,42 +2290,36 @@
                         return;
                     }
                     
-                    // --- NEW: Password Validation ---
                     if (!isValidPassword(newPassword)) {
-                        showCustomAlert('Password is not strong enough. It must be at least 8 characters and include letters, numbers, and symbols (e.g., !@#$).');
+                        showCustomAlert('Password is not strong enough.');
                         newPasswordInputEl.closest('.form-group').classList.add('invalid');
                         return;
                     }
                     newPasswordInputEl.closest('.form-group').classList.remove('invalid');
-                    // --- END NEW ---
                     
                     if (tempUserForPasswordReset) {
-                        // Find the user in the mock DB and update their password
-                        const userInDb = MOCK_USERS_DB.find(u => u.id === tempUserForPasswordReset.id);
-                        if (userInDb) {
-                            userInDb.password = newPassword;
-                        }
-                        
+                        tempUserForPasswordReset.password = newPassword;
+                        LocalDB.updateUser(tempUserForPasswordReset); // Update in DB
+
                         tempUserForPasswordReset = null;
                         resetPasswordForm.reset();
                         otpForm.reset();
                         forgotPasswordForm.reset();
                         
                         showLoginForm();
-                        showCustomAlert('Password reset successful! You can now log in with your new password.');
+                        showCustomAlert('Password reset successful!');
                     } else {
                         showCustomAlert('An error occurred. Please try again.');
                         showLoginForm();
                     }
                 });
                 
-                // --- NEW: Password Field Listeners ---
                 const registerPasswordInput = document.getElementById('register-password');
                 const newPasswordInput = document.getElementById('new-password');
                 
                 const setupPasswordListener = (inputEl) => {
                     if (!inputEl) return;
-                    const rulesEl = inputEl.nextElementSibling; // Get the <p> tag
+                    const rulesEl = inputEl.nextElementSibling; 
                     if (rulesEl && rulesEl.classList.contains('password-rules')) {
                         inputEl.addEventListener('focus', () => {
                             rulesEl.classList.remove('hidden');
@@ -2418,7 +2328,6 @@
                             rulesEl.classList.add('hidden');
                         });
                         inputEl.addEventListener('input', () => {
-                            // Remove invalid state on typing
                             inputEl.closest('.form-group').classList.remove('invalid');
                         });
                     }
@@ -2427,21 +2336,16 @@
                 setupPasswordListener(registerPasswordInput);
                 setupPasswordListener(newPasswordInput);
                 
-                // Also add input listener for confirm password
                 const confirmPasswordInput = document.getElementById('confirm-password');
                 if (confirmPasswordInput) {
                     confirmPasswordInput.addEventListener('input', () => {
                          confirmPasswordInput.closest('.form-group').classList.remove('invalid');
                     });
                 }
-                // --- END NEW ---
-            
             };
 
-            
             // --- DYNAMIC CHATBOT LOGIC ---
             
-            // Chatbot DOM Elements
             const chatToggleBtn = document.getElementById('chat-toggle-btn');
             const chatWindow = document.getElementById('chat-window');
             const closeChatBtn = document.getElementById('close-chat-btn');
@@ -2449,44 +2353,28 @@
             const chatForm = document.getElementById('chat-form');
             const chatInput = document.getElementById('chat-input');
             
-            // Embedded API key (client-side) per user request.
-            // WARNING: This exposes the key to anyone who loads the site. Rotate the key
-            // in your Google Cloud Console after testing and consider using a server-side proxy.
+            // NOTE: For AI to work locally, you need your own API Key.
+            // Visit https://aistudio.google.com to get a key.
             const GEMINI_API_KEY = 'AIzaSyD4YGpH1dmrKm81PG117zGjh2mGArZ4uGU';
-
-            // Updated the URL to the correct model endpoint.
-            // NOTE: For production, avoid sending keys from client-side. Proxy requests via backend.
             const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
 
-            /**
-             * Toggles the visibility of the chat window.
-             */
             const toggleChatWindow = () => {
                 chatWindow.classList.toggle('hidden');
             };
 
-            /**
-             * Adds a message to the chat UI.
-             * @param {string} message - The text of the message.
-             * @param {string} sender - 'user' or 'bot'.
-             * @returns {HTMLElement} The created message element.
-             */
             const addChatMessage = (message, sender) => {
                 const messageEl = document.createElement('div');
                 messageEl.className = `chat-message ${sender}`;
                 messageEl.textContent = message;
                 
                 chatMessages.appendChild(messageEl);
-                chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
+                chatMessages.scrollTop = chatMessages.scrollHeight; 
                 return messageEl;
             };
             
-            /**
-             * Shows the animated "..." typing indicator.
-             */
             const showTypingIndicator = () => {
                 const indicatorEl = document.createElement('div');
-                indicatorEl.className = 'chat-message bot'; // Styled as a bot message
+                indicatorEl.className = 'chat-message bot';
                 indicatorEl.id = 'typing-indicator';
                 indicatorEl.innerHTML = `
                     <div class="typing-indicator">
@@ -2497,49 +2385,35 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             };
             
-            /**
-             * Removes the typing indicator.
-             */
             const hideTypingIndicator = () => {
                  const typingEl = document.getElementById('typing-indicator');
                  if(typingEl) typingEl.remove();
             };
 
-            /**
-             * Handles the chat form submission, sending the user input to the AI.
-             */
             const handleChatSubmit = async (e) => {
                 e.preventDefault();
                 const userInput = chatInput.value.trim();
                 if (!userInput) return;
 
-                // 1. Add user's message to UI
                 addChatMessage(userInput, 'user');
                 chatInput.value = '';
                 showTypingIndicator();
 
                 try {
-                    // 2. Get AI response
                     const botResponse = await getAIResponse(userInput);
-                    
-                    // 3. Remove loading and add bot response
                     hideTypingIndicator();
                     addChatMessage(botResponse, 'bot');
-
                 } catch (error) {
                     console.error('Error fetching AI response:', error);
                     hideTypingIndicator();
-                    addChatMessage('Sorry, I am having trouble connecting. (This may be due to an invalid API key). Please try again.', 'bot');
+                    addChatMessage('Sorry, I am having trouble connecting. Please check your API key.', 'bot');
                 }
             };
 
-            /**
-             * Fetches a response from the Gemini AI API.
-             * @param {string} userInput - The user's question.
-             * @returns {Promise<string>} The AI's text response.
-             */
             const getAIResponse = async (userInput) => {
-                // Create a prompt that gives the AI "context" about our app's data.
+                // Use current live data for the chatbot from LocalDB
+                const productBatches = LocalDB.getBatches();
+                
                 const systemPrompt = `
                     You are a helpful assistant for a Food Supply Chain Management platform.
                     Your job is to answer the user's questions based *only* on the data provided below.
@@ -2562,14 +2436,7 @@
                         parts: [{
                             text: systemPrompt
                         }]
-                    }],
-                    // Add safety settings to reduce refusal for this simple task
-                    safetySettings: [
-                        { "category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE" },
-                        { "category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE" },
-                        { "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE" },
-                        { "category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE" }
-                    ]
+                    }]
                 };
 
                 const response = await fetch(GEMINI_API_URL, {
@@ -2586,37 +2453,24 @@
 
                 const data = await response.json();
                 
-                // Parse the specific response from the Gemini API
                 if (data.candidates && data.candidates[0] && data.candidates[0].content) {
                      return data.candidates[0].content.parts[0].text;
-                } else if (data.candidates && data.candidates[0].finishReason === 'SAFETY') {
-                    // Handle cases where the prompt is blocked for safety
-                    return "I'm sorry, I can't respond to that query due to safety settings.";
                 } else {
-                    // Generic fallback
                     return "I'm not sure how to respond to that.";
                 }
             };
             
-            // --- Event Listener for Suggestion Chips ---
-            // Uses event delegation on the chat messages container
             document.getElementById('chat-messages').addEventListener('click', (e) => {
                 if(e.target.classList.contains('chat-suggestion-chip')) {
                     const suggestion = e.target.textContent;
                     chatInput.value = suggestion;
-                    // Create and dispatch a submit event on the form
                     const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
                     chatForm.dispatchEvent(submitEvent);
                 }
             });
             
-            // --- END CHATBOT LOGIC ---
-
-
-            // --- Main App Initialization ---
             initApp();
             
-            // --- Chatbot Initialization ---
             chatToggleBtn.addEventListener('click', toggleChatWindow);
             closeChatBtn.addEventListener('click', toggleChatWindow);
             chatForm.addEventListener('submit', handleChatSubmit);
