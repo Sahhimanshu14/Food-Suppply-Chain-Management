@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food Supply Chain Management Platform</title>
-    <!-- Leaflet CSS for maps -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <!-- (Leaflet CSS removed; using Google Maps JS) -->
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #0f7b57, #12b9aa, #c2a978);
@@ -1390,6 +1389,7 @@
                             <input type="text" id="product-name" placeholder="Product Name (e.g., Organic Apples)" required>
                             <input type="number" id="product-quantity" placeholder="Quantity (kg)" required>
                             <input type="date" id="harvest-date" required>
+                            <input type="text" id="product-address" tabindex="0" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Harvest address (street, city) — optional">
                         </div>
                         <button type="submit">Add Batch</button>
                     </form>
@@ -1472,10 +1472,14 @@
                 </div>
                 <div class="modal-body">
                     <div class="tracking-layout">
-                        <div class="map-container">
-                             <h4>Live Tracking</h4>
-                             <div id="map"></div>
-                        </div>
+                                <div class="map-container">
+                                    <h4>Live Tracking</h4>
+                                    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+                                      <button id="load-maps-btn" style="padding:6px 10px;border-radius:8px;background:#0f7b57;color:#fff;border:none;cursor:pointer;">Load Maps</button>
+                                      <span id="map-status" style="font-size:0.9rem;color:var(--text-secondary);"></span>
+                                    </div>
+                                    <div id="map"></div>
+                                </div>
                         <div class="tracking-details">
                             <h4>Timeline</h4>
                             <ul id="tracking-timeline" class="timeline">
@@ -1484,6 +1488,7 @@
                             <div id="modal-qr-code" class="qr-code-container">
                                 <!-- QR code canvas injected by JS -->
                             </div>
+                            <div id="modal-qr-info" style="margin-top:8px;font-size:0.95rem;color:var(--text-primary);"></div>
                         </div>
                     </div>
                 </div>
@@ -1528,6 +1533,26 @@
                 <!-- Chat Icon -->
                 <svg fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px" height="24px"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
             </button>
+        </div>
+        <!-- Diagnostics Toggle (bottom-right) -->
+        <button id="diag-toggle-btn" title="Open Diagnostics" style="position:fixed;right:96px;bottom:22px;z-index:1200;background:#333;color:#fff;border-radius:50%;width:44px;height:44px;border:none;display:flex;align-items:center;justify-content:center;">D</button>
+
+        <!-- Diagnostics Modal -->
+        <div class="modal-overlay" id="diag-modal" style="display:none;">
+            <div class="modal-content" style="max-width:720px;">
+                <div class="modal-header">
+                    <h3>Diagnostics</h3>
+                    <button id="diag-close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Use this panel to run quick checks for Maps, Places and Geocoding.</p>
+                    <div style="display:flex;gap:8px;margin-bottom:8px;">
+                        <button id="run-diag-btn" style="padding:6px 10px;border-radius:8px;background:#0f7b57;color:#fff;border:none;cursor:pointer;">Run Diagnostics</button>
+                        <button id="clear-diag-btn" style="padding:6px 10px;border-radius:8px;background:#777;color:#fff;border:none;cursor:pointer;">Clear</button>
+                    </div>
+                    <pre id="diag-log" style="height:350px;overflow:auto;background:#0b0b0b;color:#e6e6e6;padding:10px;border-radius:6px;font-size:12px;white-space:pre-wrap;"></pre>
+                </div>
+            </div>
         </div>
         <!-- ============================================== -->
 
@@ -1575,7 +1600,7 @@
     
     <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Maps will be lazy-loaded when needed via `loadGoogleMapsApi()`; keep qrious for QR generation -->
     
     <!-- Main Application Logic -->
     <script>
@@ -1675,9 +1700,138 @@
             // Initialize DB
             LocalDB.init();
 
+            // Centralized Google Maps API key (change here when rotating/replacing key)
+            const GOOGLE_MAPS_API_KEY = 'AIzaSyCaclQblPjB69F_4C_1lkCnZ3Q0cCGP1Dk';
+
+            // --- Diagnostics helpers ---
+            let diagnostics = [];
+            const logDiagnostic = (level, message, meta) => {
+                const entry = { ts: new Date().toISOString(), level, message, meta: meta || null };
+                diagnostics.unshift(entry);
+                // Keep recent 100
+                if (diagnostics.length > 100) diagnostics.length = 100;
+                console[(level === 'error') ? 'error' : (level === 'warn' ? 'warn' : 'debug')](`[DIAG:${level}] ${message}`, meta || '');
+                const panel = document.getElementById('diag-log');
+                if (panel) panel.textContent = diagnostics.map(d => `${d.ts} [${d.level.toUpperCase()}] ${d.message}${d.meta ? ' — ' + JSON.stringify(d.meta) : ''}`).join('\n\n');
+            };
+
+            // Cached loader promise for Google Maps (Places + Maps JS)
+            let _googleMapsLoader = null;
+
             let currentUser = null;
             let map; // Leaflet map instance
             let polyline; // Leaflet polyline instance
+
+            // Lazy-load Google Maps JS with Places library. Resolves when `google.maps` is available.
+            const loadGoogleMapsApi = () => {
+                if (_googleMapsLoader) return _googleMapsLoader;
+                _googleMapsLoader = new Promise((resolve, reject) => {
+                    if (typeof window.google !== 'undefined' && window.google.maps) {
+                        logDiagnostic('info', 'Google Maps already loaded in memory');
+                        resolve(window.google);
+                        return;
+                    }
+                    logDiagnostic('info', `Loading Google Maps API with key ending in ...cCGP1Dk`);
+                    const script = document.createElement('script');
+                    script.async = true;
+                    script.defer = true;
+                    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places,geocoding`;
+                    script.onload = () => {
+                        logDiagnostic('info', 'Google Maps script tag loaded from CDN');
+                        if (window.google && window.google.maps) {
+                            logDiagnostic('info', 'Google Maps API fully initialized');
+                            resolve(window.google);
+                        } else {
+                            logDiagnostic('error', 'Google Maps script loaded but google.maps missing', { hasGoogle: !!window.google });
+                            reject(new Error('Google maps loaded but google.maps is not available'));
+                        }
+                    };
+                    script.onerror = (err) => {
+                        logDiagnostic('error', 'Failed to load Google Maps API script', { message: err?.message || String(err) });
+                        reject(new Error('Failed to load Google Maps API: ' + (err?.message || 'Network error')));
+                    };
+                    document.head.appendChild(script);
+                });
+                return _googleMapsLoader;
+            };
+
+            // Helper: geocode an address string to {lat,lng,formatted}
+            const geocodeAddress = (address) => {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        logDiagnostic('info', 'Geocoding address', { address });
+                        await loadGoogleMapsApi();
+                    } catch (e) {
+                        logDiagnostic('error', 'Maps API load failed during geocoding', { message: e?.message });
+                        reject(new Error('Google Maps API not available for geocoding: ' + (e?.message || '')));
+                        return;
+                    }
+                    try {
+                        if (!window.google || !window.google.maps || !window.google.maps.Geocoder) {
+                            logDiagnostic('error', 'Google Geocoder not available', { hasGoogle: !!window.google, hasMaps: !!window.google?.maps, hasGeocoder: !!window.google?.maps?.Geocoder });
+                            reject(new Error('Google Geocoder class not available'));
+                            return;
+                        }
+                        const geocoder = new google.maps.Geocoder();
+                        geocoder.geocode({ address }, (results, status) => {
+                            logDiagnostic('info', 'Geocode response received', { status, resultCount: results?.length || 0 });
+                            if (status === 'OK' && results && results[0]) {
+                                const loc = results[0].geometry.location;
+                                const result = { lat: loc.lat(), lng: loc.lng(), formatted: results[0].formatted_address };
+                                logDiagnostic('info', 'Geocode success', result);
+                                resolve(result);
+                            } else {
+                                const errorMsg = `Geocode failed with status: ${status}`;
+                                logDiagnostic('warn', errorMsg, { status, address });
+                                reject(new Error(errorMsg));
+                            }
+                        });
+                    } catch (err) {
+                        logDiagnostic('error', 'Exception during geocoding', { message: err?.message });
+                        reject(err);
+                    }
+                });
+            };
+
+            // Map state for Google Maps: markers keyed by timestamp and polyline instance
+            let markersMap = {};
+
+            // Ensure the product-address input is editable and try to init Places Autocomplete non-blocking
+            const ensureAddressInputReady = () => {
+                const el = document.getElementById('product-address');
+                if (!el) return;
+                try {
+                    el.removeAttribute('readonly');
+                    el.disabled = false;
+                    el.style.pointerEvents = 'auto';
+                    el.tabIndex = el.tabIndex || 0;
+                    if (!el.placeholder) el.placeholder = 'Harvest address (street, city) — optional';
+                } catch (e) {
+                    console.warn('Could not force-enable product-address input', e);
+                }
+
+                // Initialize Places Autocomplete in background; don't block if Maps fails
+                loadGoogleMapsApi()
+                    .then(() => {
+                        try {
+                            if (window.google && google.maps && google.maps.places) {
+                                const ac = new google.maps.places.Autocomplete(el, { types: ['geocode'] });
+                                ac.addListener && ac.addListener('place_changed', () => {
+                                    try {
+                                        const place = ac.getPlace();
+                                        if (place && place.formatted_address) el.value = place.formatted_address;
+                                    } catch (err) { console.warn('Error handling place_changed', err); }
+                                });
+                                console.debug('[ensureAddressInputReady] Autocomplete initialized');
+                            }
+                        } catch (err) {
+                            console.warn('Autocomplete init failed', err);
+                        }
+                    })
+                    .catch(() => {
+                        console.debug('Google Maps not available yet — skipping autocomplete init');
+                    });
+            };
 
             // --- DOM ELEMENTS ---
             const loginView = document.getElementById('login-view');
@@ -2060,8 +2214,22 @@
 
                 document.getElementById('modal-title').textContent = `${product.name} (Batch ID: ${product.id})`;
                 renderTimeline(product.history);
+                // Render map for this product's history
                 renderMap(product.history);
-                generateQRCode(product.id);
+                // Generate QR with embedded batch details (id, name, latest location/address, status)
+                generateQRCode(product);
+
+                // Update map status and attempt to lazy-load Google Maps (Places) in background
+                const mapStatusEl = document.getElementById('map-status');
+                if (mapStatusEl) mapStatusEl.textContent = 'Checking Maps...';
+                loadGoogleMapsApi()
+                    .then(() => {
+                        if (mapStatusEl) mapStatusEl.textContent = 'Maps (Places) available';
+                    })
+                    .catch((err) => {
+                        console.warn('Google Maps lazy-load failed:', err);
+                        if (mapStatusEl) mapStatusEl.textContent = 'Maps unavailable';
+                    });
 
                 trackingModal.classList.add('visible');
             };
@@ -2081,55 +2249,172 @@
                 });
             };
 
+            // Render map using Google Maps (incremental markers + polyline)
             const renderMap = (history) => {
-                if(map) {
-                    map.remove();
-                }
-                
-                const coordinates = history
-                    .filter(item => item.location) 
-                    .map(item => [item.location.lat, item.location.lng]);
+                const locations = (history || [])
+                    .filter(h => h.location && typeof h.location.lat === 'number')
+                    .map(h => ({ lat: h.location.lat, lng: h.location.lng, status: h.status, by: h.by, timestamp: h.timestamp, address: h.location.address || h.location.formatted || '' }));
+                updateMapWithLocations(locations);
+            };
 
-                if (coordinates.length === 0) {
-                    document.getElementById('map').innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No location data available.</p>';
+            const updateMapWithLocations = async (locations) => {
+                const mapEl = document.getElementById('map');
+                if (!mapEl) {
+                    logDiagnostic('warn', 'Map element not found in DOM');
                     return;
                 }
 
-                const center = coordinates[coordinates.length - 1]; 
-                map = L.map('map').setView(center, 10);
+                if (!locations || locations.length === 0) {
+                    logDiagnostic('warn', 'No location data to render on map');
+                    mapEl.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No location data available.</p>';
+                    return;
+                }
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(map);
+                try {
+                    logDiagnostic('info', 'Attempting to load Maps API for rendering', { locCount: locations.length });
+                    await loadGoogleMapsApi();
+                    logDiagnostic('info', 'Maps API loaded successfully for map rendering');
+                } catch (e) {
+                    logDiagnostic('error', 'Google Maps not available for rendering map', { message: e?.message });
+                    mapEl.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Google Maps API error: ' + (e?.message || 'Unknown error') + '</p>';
+                    return;
+                }
 
-                history.filter(item => item.location).forEach(item => {
-                     L.marker([item.location.lat, item.location.lng]).addTo(map)
-                         .bindPopup(`<b>${item.status}</b><br>By: ${item.by}`);
+                // initialize map if needed
+                if (!map) {
+                    try {
+                        const center = locations[locations.length - 1];
+                        logDiagnostic('info', 'Creating new Google Map instance', { center: { lat: center.lat, lng: center.lng } });
+                        map = new google.maps.Map(mapEl, {
+                            center: { lat: center.lat, lng: center.lng },
+                            zoom: 10,
+                            mapTypeControl: false,
+                            streetViewControl: false
+                        });
+                        logDiagnostic('info', 'Google Map instance created successfully');
+                    } catch (mapErr) {
+                        logDiagnostic('error', 'Failed to create Google Map instance', { message: mapErr?.message });
+                        mapEl.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Map initialization error: ' + (mapErr?.message || 'Unknown') + '</p>';
+                        return;
+                    }
+                }
+
+                // Clear existing markers and recreate (simple and robust for this app)
+                Object.keys(markersMap).forEach(k => {
+                    try { markersMap[k].setMap(null); } catch (e) {}
+                    delete markersMap[k];
                 });
 
-                polyline = L.polyline(coordinates, {color: 'var(--accent-primary)'}).addTo(map);
+                const path = [];
+                const infoWindow = new google.maps.InfoWindow();
 
-                if (coordinates.length > 1) {
-                    map.fitBounds(polyline.getBounds());
-                } else if (coordinates.length === 1) {
-                    map.setZoom(13); 
+                locations.forEach(loc => {
+                    const key = loc.timestamp || `${loc.lat}-${loc.lng}`;
+                    const marker = new google.maps.Marker({
+                        position: { lat: loc.lat, lng: loc.lng },
+                        map: map,
+                        title: loc.status
+                    });
+                    marker.__info = `<div><strong>${loc.status}</strong><br>By: ${loc.by}<br>${loc.address ? loc.address + '<br>' : ''}${new Date(loc.timestamp).toLocaleString()}</div>`;
+                    marker.addListener('click', () => {
+                        infoWindow.setContent(marker.__info);
+                        infoWindow.open(map, marker);
+                    });
+                    markersMap[key] = marker;
+                    path.push({ lat: loc.lat, lng: loc.lng });
+                });
+
+                // Polyline
+                if (polyline) {
+                    try { polyline.setMap(null); } catch (e) {}
+                    polyline = null;
+                }
+                polyline = new google.maps.Polyline({
+                    path: path,
+                    geodesic: true,
+                    strokeColor: '#0f7b57',
+                    strokeOpacity: 0.9,
+                    strokeWeight: 4,
+                });
+                polyline.setMap(map);
+
+                // Fit bounds
+                if (locations.length > 1) {
+                    const bounds = new google.maps.LatLngBounds();
+                    locations.forEach(l => bounds.extend({ lat: l.lat, lng: l.lng }));
+                    map.fitBounds(bounds);
+                } else {
+                    map.panTo({ lat: locations[0].lat, lng: locations[0].lng });
+                    map.setZoom(13);
                 }
             };
 
             const generateQRCode = (data) => {
+                // Accept either a product object or a raw string. If product object, embed useful details.
+                let valueStr;
+                try {
+                    if (data && typeof data === 'object') {
+                        const product = data;
+                        // Find latest history item with a location
+                        const latest = (product.history && product.history.length) ? [...product.history].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp))[0] : null;
+                        const latestLoc = latest && latest.location ? {
+                            lat: latest.location.lat,
+                            lng: latest.location.lng,
+                            address: latest.location.address || latest.location.formatted || ''
+                        } : null;
+                        const payload = {
+                            id: product.id,
+                            name: product.name,
+                            status: product.status,
+                            quantity: product.quantity,
+                            latestLocation: latestLoc,
+                            timestamp: latest ? latest.timestamp : null
+                        };
+                        valueStr = JSON.stringify(payload);
+                    } else {
+                        valueStr = String(data || '');
+                    }
+                } catch (e) {
+                    console.warn('Failed to prepare QR payload', e);
+                    valueStr = String(data || '');
+                }
+
                 const qrContainer = document.getElementById('modal-qr-code');
-                qrContainer.innerHTML = ''; 
+                qrContainer.innerHTML = '';
                 const canvas = document.createElement('canvas');
                 canvas.id = 'qr-canvas';
                 qrContainer.appendChild(canvas);
-                
+
                 new QRious({
                     element: canvas,
-                    value: data,
+                    value: valueStr,
                     size: 150,
-                    level: 'H' 
+                    level: 'H'
                 });
+
+                // Populate a human-readable summary next to the QR so scanners/users see key info
+                try {
+                    const infoEl = document.getElementById('modal-qr-info');
+                    if (infoEl) {
+                        let html = '';
+                        if (data && typeof data === 'object') {
+                            const latest = (data.history && data.history.length) ? [...data.history].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp))[0] : null;
+                            const addr = latest && latest.location ? (latest.location.address || latest.location.formatted || '') : '';
+                            const ts = latest && latest.timestamp ? new Date(latest.timestamp).toLocaleString() : '';
+                            html += `<div><strong>Batch:</strong> ${data.id}</div>`;
+                            html += `<div><strong>Name:</strong> ${data.name}</div>`;
+                            html += `<div><strong>Status:</strong> ${data.status}</div>`;
+                            html += `<div><strong>Quantity:</strong> ${data.quantity || 0} kg</div>`;
+                            if (addr) html += `<div><strong>Address:</strong> ${addr}</div>`;
+                            if (ts) html += `<div><strong>Last updated:</strong> ${ts}</div>`;
+                        } else {
+                            html = `<div>${String(data || '')}</div>`;
+                        }
+                        infoEl.innerHTML = html;
+                    }
+                } catch (err) {
+                    console.warn('Failed to populate QR info', err);
+                }
             };
             
             const bindEventListeners = () => {
@@ -2176,41 +2461,97 @@
                 
                 logoutBtn.addEventListener('click', logout);
                 
-                addProductForm.addEventListener('submit', (e) => {
+                // Defensive add-batch handler: protect against runtime errors and ensure address input is editable
+                addProductForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    if (!currentUser || currentUser.role !== 'farmer') {
-                        showCustomAlert("Only farmers can add new batches.");
-                        return;
-                    }
-                    
-                    const name = document.getElementById('product-name').value;
-                    const quantity = document.getElementById('product-quantity').value;
-                    const harvestDate = document.getElementById('harvest-date').value;
+                    try {
+                        console.debug('[add-product-form] submit handler start');
+                        if (!currentUser || currentUser.role !== 'farmer') {
+                            showCustomAlert("Only farmers can add new batches.");
+                            return;
+                        }
 
-                    const newBatch = {
-                        id: `batch-${Date.now()}`,
-                        name: name,
-                        quantity: parseFloat(quantity),
-                        status: 'harvested',
-                        history: [
-                            { 
-                                status: 'Harvested', 
-                                by: `${currentUser.name} (Farmer)`, 
-                                timestamp: new Date(harvestDate).toISOString(),
-                                location: { lat: 19.0760, lng: 72.8777 }
+                        const name = document.getElementById('product-name').value.trim();
+                        const quantity = document.getElementById('product-quantity').value;
+                        const harvestDateRaw = document.getElementById('harvest-date').value;
+                        const addressInputEl = document.getElementById('product-address');
+                        const addressInput = addressInputEl ? addressInputEl.value.trim() : '';
+
+                        // Safe timestamp handling: fallback to now if harvestDate is missing or invalid
+                        let harvestTimestamp = new Date();
+                        if (harvestDateRaw) {
+                            const parsed = new Date(harvestDateRaw);
+                            if (!isNaN(parsed.getTime())) harvestTimestamp = parsed;
+                        }
+
+                        let location = { lat: 19.0760, lng: 72.8777 };
+                        let formattedAddress = '';
+
+                        if (addressInput) {
+                            try {
+                                const geo = await geocodeAddress(addressInput);
+                                location = { lat: geo.lat, lng: geo.lng };
+                                formattedAddress = geo.formatted || addressInput;
+                            } catch (err) {
+                                console.warn('Geocoding failed, using default location.', err);
+                                showCustomAlert('Address could not be geocoded. Using default location.');
                             }
-                        ]
-                    };
+                        }
 
-                    LocalDB.addBatch(newBatch);
-                    e.target.reset();
-                    renderAllDashboards();
-                    showCustomAlert(`New Batch '${name}' added to database.`);
+                        const newBatch = {
+                            id: `batch-${Date.now()}`,
+                            name: name || 'Unnamed Batch',
+                            quantity: isNaN(parseFloat(quantity)) ? 0 : parseFloat(quantity),
+                            status: 'harvested',
+                            history: [
+                                {
+                                    status: 'Harvested',
+                                    by: `${currentUser.name} (Farmer)`,
+                                    timestamp: harvestTimestamp.toISOString(),
+                                    location: { lat: location.lat, lng: location.lng, address: formattedAddress }
+                                }
+                            ]
+                        };
+
+                        LocalDB.addBatch(newBatch);
+                        e.target.reset();
+                        renderAllDashboards();
+                        console.debug('[add-product-form] batch added', newBatch.id);
+                        showCustomAlert(`New Batch '${newBatch.name}' added to database.`);
+                        // Open tracking modal for the newly created batch so the map and QR reflect the provided address
+                        try {
+                            showTrackingModal(newBatch.id);
+                        } catch (err) {
+                            console.warn('Failed to auto-open tracking modal for new batch', err);
+                        }
+                    } catch (err) {
+                        console.error('Unexpected error in add-product-form submit:', err);
+                        showCustomAlert('An error occurred while adding the batch. Check console for details.');
+                    }
                 });
 
                 document.querySelectorAll('.product-list').forEach(list => {
                     list.addEventListener('click', handleProductAction);
                 });
+
+                // Manual Load Maps button (debug) — triggers the lazy loader and updates status
+                const loadMapsBtn = document.getElementById('load-maps-btn');
+                const mapStatusEl = document.getElementById('map-status');
+                if (loadMapsBtn) {
+                    loadMapsBtn.addEventListener('click', () => {
+                        if (mapStatusEl) mapStatusEl.textContent = 'Loading...';
+                        loadGoogleMapsApi()
+                            .then(() => {
+                                if (mapStatusEl) mapStatusEl.textContent = 'Maps loaded';
+                                showCustomAlert('Google Maps (Places) loaded successfully.');
+                            })
+                            .catch((err) => {
+                                console.error('Manual load of Google Maps failed', err);
+                                if (mapStatusEl) mapStatusEl.textContent = 'Load failed';
+                                showCustomAlert('Failed to load Google Maps. Check console for errors.');
+                            });
+                    });
+                }
 
                 searchInput.addEventListener('input', (e) => {
                     renderAllDashboards(e.target.value);
@@ -2224,6 +2565,50 @@
                         hideCustomAlert();
                     }
                 });
+
+                // Diagnostics UI wiring
+                const diagToggleBtn = document.getElementById('diag-toggle-btn');
+                const diagModal = document.getElementById('diag-modal');
+                const diagCloseBtn = document.getElementById('diag-close-btn');
+                const runDiagBtn = document.getElementById('run-diag-btn');
+                const clearDiagBtn = document.getElementById('clear-diag-btn');
+
+                const showDiag = () => { if (diagModal) diagModal.style.display = 'block'; };
+                const hideDiag = () => { if (diagModal) diagModal.style.display = 'none'; };
+
+                if (diagToggleBtn) diagToggleBtn.addEventListener('click', () => { showDiag(); });
+                if (diagCloseBtn) diagCloseBtn.addEventListener('click', () => { hideDiag(); });
+                if (diagModal) diagModal.addEventListener('click', (e) => { if (e.target === diagModal) hideDiag(); });
+
+                if (clearDiagBtn) clearDiagBtn.addEventListener('click', () => { diagnostics = []; const panel = document.getElementById('diag-log'); if (panel) panel.textContent = ''; });
+
+                const runDiagnostics = async () => {
+                    logDiagnostic('info', 'Running diagnostics...');
+                    // Check if google object present
+                    if (typeof window.google !== 'undefined' && window.google.maps) {
+                        logDiagnostic('info', 'window.google.maps is already available');
+                    } else {
+                        logDiagnostic('warn', 'window.google.maps not present — trying lazy loader');
+                    }
+
+                    try {
+                        await loadGoogleMapsApi();
+                        logDiagnostic('info', 'loadGoogleMapsApi() succeeded');
+                    } catch (err) {
+                        logDiagnostic('error', 'loadGoogleMapsApi() failed', { message: err.message });
+                        return;
+                    }
+
+                    // Try a simple geocode lookup
+                    try {
+                        const res = await geocodeAddress('New York, NY');
+                        logDiagnostic('info', 'Geocode test succeeded', res);
+                    } catch (err) {
+                        logDiagnostic('error', 'Geocode test failed', { message: err.message });
+                    }
+                };
+
+                if (runDiagBtn) runDiagBtn.addEventListener('click', runDiagnostics);
                 
                 const showLoginForm = () => {
                     loginFormElement.classList.remove('hidden');
