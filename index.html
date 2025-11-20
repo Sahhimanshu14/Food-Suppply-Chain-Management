@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food Supply Chain Management Platform</title>
-    <!-- (Leaflet CSS removed; using Google Maps JS) -->
+    <!-- Leaflet CSS (Free Maps) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #0f7b57, #12b9aa, #c2a978);
@@ -682,6 +683,7 @@
             height: 300px;
             width: 100%;
             border-radius: var(--radius-sm);
+            z-index: 1; /* Ensure map is below modal content */
         }
         
         .tracking-details h4 {
@@ -1474,10 +1476,7 @@
                     <div class="tracking-layout">
                                 <div class="map-container">
                                     <h4>Live Tracking</h4>
-                                    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-                                      <button id="load-maps-btn" style="padding:6px 10px;border-radius:8px;background:#0f7b57;color:#fff;border:none;cursor:pointer;">Load Maps</button>
-                                      <span id="map-status" style="font-size:0.9rem;color:var(--text-secondary);"></span>
-                                    </div>
+                                    <!-- Removed load-maps-btn since Leaflet loads instantly -->
                                     <div id="map"></div>
                                 </div>
                         <div class="tracking-details">
@@ -1534,27 +1533,8 @@
                 <svg fill="white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24px" height="24px"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
             </button>
         </div>
-        <!-- Diagnostics Toggle (bottom-right) -->
-        <button id="diag-toggle-btn" title="Open Diagnostics" style="position:fixed;right:96px;bottom:22px;z-index:1200;background:#333;color:#fff;border-radius:50%;width:44px;height:44px;border:none;display:flex;align-items:center;justify-content:center;">D</button>
-
-        <!-- Diagnostics Modal -->
-        <div class="modal-overlay" id="diag-modal" style="display:none;">
-            <div class="modal-content" style="max-width:720px;">
-                <div class="modal-header">
-                    <h3>Diagnostics</h3>
-                    <button id="diag-close-btn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p>Use this panel to run quick checks for Maps, Places and Geocoding.</p>
-                    <div style="display:flex;gap:8px;margin-bottom:8px;">
-                        <button id="run-diag-btn" style="padding:6px 10px;border-radius:8px;background:#0f7b57;color:#fff;border:none;cursor:pointer;">Run Diagnostics</button>
-                        <button id="clear-diag-btn" style="padding:6px 10px;border-radius:8px;background:#777;color:#fff;border:none;cursor:pointer;">Clear</button>
-                    </div>
-                    <pre id="diag-log" style="height:350px;overflow:auto;background:#0b0b0b;color:#e6e6e6;padding:10px;border-radius:6px;font-size:12px;white-space:pre-wrap;"></pre>
-                </div>
-            </div>
-        </div>
-        <!-- ============================================== -->
+        
+        <!-- REMOVED: Diagnostics Toggle (bottom-right) and Diagnostics Modal -->
 
     </div> <!-- End #app-container -->
     
@@ -1600,16 +1580,14 @@
     
     <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <!-- Maps will be lazy-loaded when needed via `loadGoogleMapsApi()`; keep qrious for QR generation -->
+    <!-- Leaflet JS for Maps (Free, no API Key required) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     
     <!-- Main Application Logic -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
             // --- LOCAL STORAGE BACKEND SIMULATION ---
-            // This effectively replaces the Firebase database with your browser's local storage.
-            // Data will persist even if you refresh the page!
-
             const DEFAULT_USERS = [
                 { id: 'f1', name: 'Farmer User 1', email: 'farmer@test.com', password: 'password', role: 'farmer', contact: '1234567890' },
                 { id: 'd1', name: 'Processor User 1', email: 'processor@test.com', password: 'password', role: 'processor', contact: '1234567890' },
@@ -1650,25 +1628,19 @@
                 init: () => {
                     if(!localStorage.getItem('fs_users')) {
                         localStorage.setItem('fs_users', JSON.stringify(DEFAULT_USERS));
-                        console.log("Database seeded with default users.");
                     }
                     if(!localStorage.getItem('fs_batches')) {
                         localStorage.setItem('fs_batches', JSON.stringify(DEFAULT_BATCHES));
-                        console.log("Database seeded with default batches.");
                     }
                 },
-                getUsers: () => {
-                    return JSON.parse(localStorage.getItem('fs_users') || '[]');
-                },
+                getUsers: () => JSON.parse(localStorage.getItem('fs_users') || '[]'),
                 addUser: (user) => {
                     const users = LocalDB.getUsers();
                     users.push(user);
                     localStorage.setItem('fs_users', JSON.stringify(users));
                     return user;
                 },
-                getBatches: () => {
-                    return JSON.parse(localStorage.getItem('fs_batches') || '[]');
-                },
+                getBatches: () => JSON.parse(localStorage.getItem('fs_batches') || '[]'),
                 addBatch: (batch) => {
                     const batches = LocalDB.getBatches();
                     batches.push(batch);
@@ -1697,140 +1669,40 @@
                 }
             };
             
-            // Initialize DB
             LocalDB.init();
-
-            // Centralized Google Maps API key (change here when rotating/replacing key)
-            const GOOGLE_MAPS_API_KEY = 'AIzaSyCaclQblPjB69F_4C_1lkCnZ3Q0cCGP1Dk';
-
-            // --- Diagnostics helpers ---
-            let diagnostics = [];
-            const logDiagnostic = (level, message, meta) => {
-                const entry = { ts: new Date().toISOString(), level, message, meta: meta || null };
-                diagnostics.unshift(entry);
-                // Keep recent 100
-                if (diagnostics.length > 100) diagnostics.length = 100;
-                console[(level === 'error') ? 'error' : (level === 'warn' ? 'warn' : 'debug')](`[DIAG:${level}] ${message}`, meta || '');
-                const panel = document.getElementById('diag-log');
-                if (panel) panel.textContent = diagnostics.map(d => `${d.ts} [${d.level.toUpperCase()}] ${d.message}${d.meta ? ' — ' + JSON.stringify(d.meta) : ''}`).join('\n\n');
-            };
-
-            // Cached loader promise for Google Maps (Places + Maps JS)
-            let _googleMapsLoader = null;
 
             let currentUser = null;
             let map; // Leaflet map instance
-            let polyline; // Leaflet polyline instance
 
-            // Lazy-load Google Maps JS with Places library. Resolves when `google.maps` is available.
-            const loadGoogleMapsApi = () => {
-                if (_googleMapsLoader) return _googleMapsLoader;
-                _googleMapsLoader = new Promise((resolve, reject) => {
-                    if (typeof window.google !== 'undefined' && window.google.maps) {
-                        logDiagnostic('info', 'Google Maps already loaded in memory');
-                        resolve(window.google);
-                        return;
+            // --- Geocoding with Nominatim (OpenStreetMap) ---
+            const geocodeAddress = async (address) => {
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    const data = await response.json();
+                    if (data && data.length > 0) {
+                        return { 
+                            lat: parseFloat(data[0].lat), 
+                            lng: parseFloat(data[0].lon), 
+                            formatted: data[0].display_name 
+                        };
                     }
-                    logDiagnostic('info', `Loading Google Maps API with key ending in ...cCGP1Dk`);
-                    const script = document.createElement('script');
-                    script.async = true;
-                    script.defer = true;
-                    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places,geocoding`;
-                    script.onload = () => {
-                        logDiagnostic('info', 'Google Maps script tag loaded from CDN');
-                        if (window.google && window.google.maps) {
-                            logDiagnostic('info', 'Google Maps API fully initialized');
-                            resolve(window.google);
-                        } else {
-                            logDiagnostic('error', 'Google Maps script loaded but google.maps missing', { hasGoogle: !!window.google });
-                            reject(new Error('Google maps loaded but google.maps is not available'));
-                        }
-                    };
-                    script.onerror = (err) => {
-                        logDiagnostic('error', 'Failed to load Google Maps API script', { message: err?.message || String(err) });
-                        reject(new Error('Failed to load Google Maps API: ' + (err?.message || 'Network error')));
-                    };
-                    document.head.appendChild(script);
-                });
-                return _googleMapsLoader;
+                    throw new Error('Address not found');
+                } catch (err) {
+                    console.error('Geocoding error:', err);
+                    throw err;
+                }
             };
 
-            // Helper: geocode an address string to {lat,lng,formatted}
-            const geocodeAddress = (address) => {
-                return new Promise(async (resolve, reject) => {
-                    try {
-                        logDiagnostic('info', 'Geocoding address', { address });
-                        await loadGoogleMapsApi();
-                    } catch (e) {
-                        logDiagnostic('error', 'Maps API load failed during geocoding', { message: e?.message });
-                        reject(new Error('Google Maps API not available for geocoding: ' + (e?.message || '')));
-                        return;
-                    }
-                    try {
-                        if (!window.google || !window.google.maps || !window.google.maps.Geocoder) {
-                            logDiagnostic('error', 'Google Geocoder not available', { hasGoogle: !!window.google, hasMaps: !!window.google?.maps, hasGeocoder: !!window.google?.maps?.Geocoder });
-                            reject(new Error('Google Geocoder class not available'));
-                            return;
-                        }
-                        const geocoder = new google.maps.Geocoder();
-                        geocoder.geocode({ address }, (results, status) => {
-                            logDiagnostic('info', 'Geocode response received', { status, resultCount: results?.length || 0 });
-                            if (status === 'OK' && results && results[0]) {
-                                const loc = results[0].geometry.location;
-                                const result = { lat: loc.lat(), lng: loc.lng(), formatted: results[0].formatted_address };
-                                logDiagnostic('info', 'Geocode success', result);
-                                resolve(result);
-                            } else {
-                                const errorMsg = `Geocode failed with status: ${status}`;
-                                logDiagnostic('warn', errorMsg, { status, address });
-                                reject(new Error(errorMsg));
-                            }
-                        });
-                    } catch (err) {
-                        logDiagnostic('error', 'Exception during geocoding', { message: err?.message });
-                        reject(err);
-                    }
-                });
-            };
-
-            // Map state for Google Maps: markers keyed by timestamp and polyline instance
-            let markersMap = {};
-
-            // Ensure the product-address input is editable and try to init Places Autocomplete non-blocking
+            // Ensure address input is ready (just enables it now, no autocomplete)
             const ensureAddressInputReady = () => {
                 const el = document.getElementById('product-address');
                 if (!el) return;
-                try {
-                    el.removeAttribute('readonly');
-                    el.disabled = false;
-                    el.style.pointerEvents = 'auto';
-                    el.tabIndex = el.tabIndex || 0;
-                    if (!el.placeholder) el.placeholder = 'Harvest address (street, city) — optional';
-                } catch (e) {
-                    console.warn('Could not force-enable product-address input', e);
-                }
-
-                // Initialize Places Autocomplete in background; don't block if Maps fails
-                loadGoogleMapsApi()
-                    .then(() => {
-                        try {
-                            if (window.google && google.maps && google.maps.places) {
-                                const ac = new google.maps.places.Autocomplete(el, { types: ['geocode'] });
-                                ac.addListener && ac.addListener('place_changed', () => {
-                                    try {
-                                        const place = ac.getPlace();
-                                        if (place && place.formatted_address) el.value = place.formatted_address;
-                                    } catch (err) { console.warn('Error handling place_changed', err); }
-                                });
-                                console.debug('[ensureAddressInputReady] Autocomplete initialized');
-                            }
-                        } catch (err) {
-                            console.warn('Autocomplete init failed', err);
-                        }
-                    })
-                    .catch(() => {
-                        console.debug('Google Maps not available yet — skipping autocomplete init');
-                    });
+                el.removeAttribute('readonly');
+                el.disabled = false;
+                el.style.pointerEvents = 'auto';
+                el.tabIndex = 0;
+                if (!el.placeholder) el.placeholder = 'Harvest address (street, city) — optional';
             };
 
             // --- DOM ELEMENTS ---
@@ -1905,10 +1777,10 @@
             
             const initApp = () => {
                 bindEventListeners();
-                // Render initial consumer view (public)
                 renderAllDashboards(); 
                 loginView.classList.remove('hidden');
                 appContainer.classList.add('hidden');
+                ensureAddressInputReady();
             };
             
             const handleLogin = (e) => {
@@ -1917,7 +1789,6 @@
                 const password = document.getElementById('login-password').value;
                 
                 const users = LocalDB.getUsers();
-                // Find user by email OR phone
                 const user = users.find(u => (u.email === emailOrPhone || u.contact === emailOrPhone));
                 
                 if (user) {
@@ -1972,10 +1843,8 @@
 
             const postLoginSetup = (user) => {
                 currentUser = user;
-                
                 loginView.classList.add('hidden');
                 appContainer.classList.remove('hidden');
-                
                 userInfo.classList.remove('hidden');
                 document.getElementById('user-name').textContent = currentUser.name;
                 document.getElementById('user-role').textContent = currentUser.role;
@@ -2004,9 +1873,7 @@
             };
             
             const renderAllDashboards = (searchTerm = '') => {
-                // Always fetch fresh data from LocalDB
                 const productBatches = LocalDB.getBatches();
-                
                  const lowerCaseSearchTerm = searchTerm.toLowerCase();
                  const filteredBatches = productBatches.filter(p => 
                      p.name.toLowerCase().includes(lowerCaseSearchTerm) || 
@@ -2214,24 +2081,14 @@
 
                 document.getElementById('modal-title').textContent = `${product.name} (Batch ID: ${product.id})`;
                 renderTimeline(product.history);
-                // Render map for this product's history
-                renderMap(product.history);
-                // Generate QR with embedded batch details (id, name, latest location/address, status)
                 generateQRCode(product);
 
-                // Update map status and attempt to lazy-load Google Maps (Places) in background
-                const mapStatusEl = document.getElementById('map-status');
-                if (mapStatusEl) mapStatusEl.textContent = 'Checking Maps...';
-                loadGoogleMapsApi()
-                    .then(() => {
-                        if (mapStatusEl) mapStatusEl.textContent = 'Maps (Places) available';
-                    })
-                    .catch((err) => {
-                        console.warn('Google Maps lazy-load failed:', err);
-                        if (mapStatusEl) mapStatusEl.textContent = 'Maps unavailable';
-                    });
-
                 trackingModal.classList.add('visible');
+                
+                // Render map after modal is visible (important for Leaflet sizing)
+                setTimeout(() => {
+                    renderMap(product.history);
+                }, 200);
             };
 
             const renderTimeline = (history) => {
@@ -2249,113 +2106,77 @@
                 });
             };
 
-            // Render map using Google Maps (incremental markers + polyline)
+            // Render map using Leaflet
             const renderMap = (history) => {
                 const locations = (history || [])
                     .filter(h => h.location && typeof h.location.lat === 'number')
-                    .map(h => ({ lat: h.location.lat, lng: h.location.lng, status: h.status, by: h.by, timestamp: h.timestamp, address: h.location.address || h.location.formatted || '' }));
+                    .map(h => ({ 
+                        lat: h.location.lat, 
+                        lng: h.location.lng, 
+                        status: h.status, 
+                        by: h.by, 
+                        timestamp: h.timestamp, 
+                        address: h.location.address || h.location.formatted || '' 
+                    }));
                 updateMapWithLocations(locations);
             };
 
-            const updateMapWithLocations = async (locations) => {
+            const updateMapWithLocations = (locations) => {
                 const mapEl = document.getElementById('map');
-                if (!mapEl) {
-                    logDiagnostic('warn', 'Map element not found in DOM');
-                    return;
+                if (!mapEl) return;
+
+                if (!map) {
+                    map = L.map('map');
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
                 }
+
+                // Clear existing layers (except tile layer)
+                map.eachLayer((layer) => {
+                    if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+                        map.removeLayer(layer);
+                    }
+                });
 
                 if (!locations || locations.length === 0) {
-                    logDiagnostic('warn', 'No location data to render on map');
-                    mapEl.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No location data available.</p>';
+                    map.setView([20.5937, 78.9629], 5); // Default to India view
                     return;
                 }
 
-                try {
-                    logDiagnostic('info', 'Attempting to load Maps API for rendering', { locCount: locations.length });
-                    await loadGoogleMapsApi();
-                    logDiagnostic('info', 'Maps API loaded successfully for map rendering');
-                } catch (e) {
-                    logDiagnostic('error', 'Google Maps not available for rendering map', { message: e?.message });
-                    mapEl.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Google Maps API error: ' + (e?.message || 'Unknown error') + '</p>';
-                    return;
-                }
-
-                // initialize map if needed
-                if (!map) {
-                    try {
-                        const center = locations[locations.length - 1];
-                        logDiagnostic('info', 'Creating new Google Map instance', { center: { lat: center.lat, lng: center.lng } });
-                        map = new google.maps.Map(mapEl, {
-                            center: { lat: center.lat, lng: center.lng },
-                            zoom: 10,
-                            mapTypeControl: false,
-                            streetViewControl: false
-                        });
-                        logDiagnostic('info', 'Google Map instance created successfully');
-                    } catch (mapErr) {
-                        logDiagnostic('error', 'Failed to create Google Map instance', { message: mapErr?.message });
-                        mapEl.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Map initialization error: ' + (mapErr?.message || 'Unknown') + '</p>';
-                        return;
-                    }
-                }
-
-                // Clear existing markers and recreate (simple and robust for this app)
-                Object.keys(markersMap).forEach(k => {
-                    try { markersMap[k].setMap(null); } catch (e) {}
-                    delete markersMap[k];
-                });
-
-                const path = [];
-                const infoWindow = new google.maps.InfoWindow();
+                const latlngs = [];
+                const bounds = L.latLngBounds();
 
                 locations.forEach(loc => {
-                    const key = loc.timestamp || `${loc.lat}-${loc.lng}`;
-                    const marker = new google.maps.Marker({
-                        position: { lat: loc.lat, lng: loc.lng },
-                        map: map,
-                        title: loc.status
-                    });
-                    marker.__info = `<div><strong>${loc.status}</strong><br>By: ${loc.by}<br>${loc.address ? loc.address + '<br>' : ''}${new Date(loc.timestamp).toLocaleString()}</div>`;
-                    marker.addListener('click', () => {
-                        infoWindow.setContent(marker.__info);
-                        infoWindow.open(map, marker);
-                    });
-                    markersMap[key] = marker;
-                    path.push({ lat: loc.lat, lng: loc.lng });
+                    const latLng = [loc.lat, loc.lng];
+                    latlngs.push(latLng);
+                    
+                    const marker = L.marker(latLng).addTo(map);
+                    const popupContent = `
+                        <div>
+                            <strong>${loc.status}</strong><br>
+                            By: ${loc.by}<br>
+                            ${loc.address ? loc.address + '<br>' : ''}
+                            ${new Date(loc.timestamp).toLocaleString()}
+                        </div>
+                    `;
+                    marker.bindPopup(popupContent);
+                    bounds.extend(latLng);
                 });
 
-                // Polyline
-                if (polyline) {
-                    try { polyline.setMap(null); } catch (e) {}
-                    polyline = null;
-                }
-                polyline = new google.maps.Polyline({
-                    path: path,
-                    geodesic: true,
-                    strokeColor: '#0f7b57',
-                    strokeOpacity: 0.9,
-                    strokeWeight: 4,
-                });
-                polyline.setMap(map);
-
-                // Fit bounds
-                if (locations.length > 1) {
-                    const bounds = new google.maps.LatLngBounds();
-                    locations.forEach(l => bounds.extend({ lat: l.lat, lng: l.lng }));
-                    map.fitBounds(bounds);
+                if (latlngs.length > 1) {
+                    const polyline = L.polyline(latlngs, {color: '#0f7b57', weight: 4}).addTo(map);
+                    map.fitBounds(bounds, {padding: [50, 50]});
                 } else {
-                    map.panTo({ lat: locations[0].lat, lng: locations[0].lng });
-                    map.setZoom(13);
+                    map.setView(latlngs[0], 13);
                 }
             };
 
             const generateQRCode = (data) => {
-                // Accept either a product object or a raw string. If product object, embed useful details.
                 let valueStr;
                 try {
                     if (data && typeof data === 'object') {
                         const product = data;
-                        // Find latest history item with a location
                         const latest = (product.history && product.history.length) ? [...product.history].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp))[0] : null;
                         const latestLoc = latest && latest.location ? {
                             lat: latest.location.lat,
@@ -2392,7 +2213,6 @@
                     level: 'H'
                 });
 
-                // Populate a human-readable summary next to the QR so scanners/users see key info
                 try {
                     const infoEl = document.getElementById('modal-qr-info');
                     if (infoEl) {
@@ -2461,11 +2281,9 @@
                 
                 logoutBtn.addEventListener('click', logout);
                 
-                // Defensive add-batch handler: protect against runtime errors and ensure address input is editable
                 addProductForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     try {
-                        console.debug('[add-product-form] submit handler start');
                         if (!currentUser || currentUser.role !== 'farmer') {
                             showCustomAlert("Only farmers can add new batches.");
                             return;
@@ -2477,7 +2295,6 @@
                         const addressInputEl = document.getElementById('product-address');
                         const addressInput = addressInputEl ? addressInputEl.value.trim() : '';
 
-                        // Safe timestamp handling: fallback to now if harvestDate is missing or invalid
                         let harvestTimestamp = new Date();
                         if (harvestDateRaw) {
                             const parsed = new Date(harvestDateRaw);
@@ -2516,9 +2333,7 @@
                         LocalDB.addBatch(newBatch);
                         e.target.reset();
                         renderAllDashboards();
-                        console.debug('[add-product-form] batch added', newBatch.id);
                         showCustomAlert(`New Batch '${newBatch.name}' added to database.`);
-                        // Open tracking modal for the newly created batch so the map and QR reflect the provided address
                         try {
                             showTrackingModal(newBatch.id);
                         } catch (err) {
@@ -2534,25 +2349,6 @@
                     list.addEventListener('click', handleProductAction);
                 });
 
-                // Manual Load Maps button (debug) — triggers the lazy loader and updates status
-                const loadMapsBtn = document.getElementById('load-maps-btn');
-                const mapStatusEl = document.getElementById('map-status');
-                if (loadMapsBtn) {
-                    loadMapsBtn.addEventListener('click', () => {
-                        if (mapStatusEl) mapStatusEl.textContent = 'Loading...';
-                        loadGoogleMapsApi()
-                            .then(() => {
-                                if (mapStatusEl) mapStatusEl.textContent = 'Maps loaded';
-                                showCustomAlert('Google Maps (Places) loaded successfully.');
-                            })
-                            .catch((err) => {
-                                console.error('Manual load of Google Maps failed', err);
-                                if (mapStatusEl) mapStatusEl.textContent = 'Load failed';
-                                showCustomAlert('Failed to load Google Maps. Check console for errors.');
-                            });
-                    });
-                }
-
                 searchInput.addEventListener('input', (e) => {
                     renderAllDashboards(e.target.value);
                 });
@@ -2566,50 +2362,6 @@
                     }
                 });
 
-                // Diagnostics UI wiring
-                const diagToggleBtn = document.getElementById('diag-toggle-btn');
-                const diagModal = document.getElementById('diag-modal');
-                const diagCloseBtn = document.getElementById('diag-close-btn');
-                const runDiagBtn = document.getElementById('run-diag-btn');
-                const clearDiagBtn = document.getElementById('clear-diag-btn');
-
-                const showDiag = () => { if (diagModal) diagModal.style.display = 'block'; };
-                const hideDiag = () => { if (diagModal) diagModal.style.display = 'none'; };
-
-                if (diagToggleBtn) diagToggleBtn.addEventListener('click', () => { showDiag(); });
-                if (diagCloseBtn) diagCloseBtn.addEventListener('click', () => { hideDiag(); });
-                if (diagModal) diagModal.addEventListener('click', (e) => { if (e.target === diagModal) hideDiag(); });
-
-                if (clearDiagBtn) clearDiagBtn.addEventListener('click', () => { diagnostics = []; const panel = document.getElementById('diag-log'); if (panel) panel.textContent = ''; });
-
-                const runDiagnostics = async () => {
-                    logDiagnostic('info', 'Running diagnostics...');
-                    // Check if google object present
-                    if (typeof window.google !== 'undefined' && window.google.maps) {
-                        logDiagnostic('info', 'window.google.maps is already available');
-                    } else {
-                        logDiagnostic('warn', 'window.google.maps not present — trying lazy loader');
-                    }
-
-                    try {
-                        await loadGoogleMapsApi();
-                        logDiagnostic('info', 'loadGoogleMapsApi() succeeded');
-                    } catch (err) {
-                        logDiagnostic('error', 'loadGoogleMapsApi() failed', { message: err.message });
-                        return;
-                    }
-
-                    // Try a simple geocode lookup
-                    try {
-                        const res = await geocodeAddress('New York, NY');
-                        logDiagnostic('info', 'Geocode test succeeded', res);
-                    } catch (err) {
-                        logDiagnostic('error', 'Geocode test failed', { message: err.message });
-                    }
-                };
-
-                if (runDiagBtn) runDiagBtn.addEventListener('click', runDiagnostics);
-                
                 const showLoginForm = () => {
                     loginFormElement.classList.remove('hidden');
                     registerFormElement.classList.add('hidden');
@@ -2738,8 +2490,6 @@
             const chatForm = document.getElementById('chat-form');
             const chatInput = document.getElementById('chat-input');
             
-            // NOTE: For AI to work locally, you need your own API Key.
-            // Visit https://aistudio.google.com to get a key.
             const GEMINI_API_KEY = 'AIzaSyD4YGpH1dmrKm81PG117zGjh2mGArZ4uGU';
             const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -2796,7 +2546,6 @@
             };
 
             const getAIResponse = async (userInput) => {
-                // Use current live data for the chatbot from LocalDB
                 const productBatches = LocalDB.getBatches();
                 
                 const systemPrompt = `
